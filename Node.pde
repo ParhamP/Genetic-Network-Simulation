@@ -6,7 +6,7 @@ class Node {
   float p; // bias
   //int k_max; // max num of input signals
   //HashMap<ArrayList<Integer>, Integer> functions;
-  ArrayList<int[]> functions;
+  ArrayList<String> functions;
   ArrayList<Integer> function_values;
   
   Node() {
@@ -21,7 +21,7 @@ class Node {
     boolean val_bool = new Random().nextDouble() < 0.5;
     value = val_bool ? 1 : 0;
     //k_max = 12;
-    functions = new ArrayList<int[]>();
+    functions = new ArrayList<String>();
     function_values = new ArrayList<Integer>();
   }
   
@@ -62,28 +62,39 @@ class Node {
     return value;
   }
   
+  void set_value(int val) {
+    value = val;
+  }
+  
   void generate_functions() {
     int k = input_signals.size();
-    int[] arr = new int[k];
-    generateAllBinaryStrings(k, arr, 0);
+    functions = generate_binary_strings(k);
+    for (int i = 0; i < functions.size(); i++) {
+      boolean val_bool = new Random().nextDouble() < p;
+      int val = val_bool ? 1 : 0;
+      function_values.add(val);
+    }
   }
   
   int calculate_value() throws Exception{
     int k = input_signals.size();
-    int[] val_arr = new int[k];
-    int val_arr_index = 0;
+    //int[] val_arr = new int[k];
+    String val_string = "";
+    //int val_arr_index = 0;
     Iterator<Signal> it = input_signals.iterator();
     while (it.hasNext()) {
       Signal current_signal = it.next();
       int current_input_val = current_signal.get_source_value();
-      val_arr[val_arr_index] = current_input_val;
-      val_arr_index = val_arr_index + 1;
+      val_string = val_string + String.valueOf(current_input_val);
+      //val_arr[val_arr_index] = current_input_val;
+      //val_arr_index = val_arr_index + 1;
     }
+    //String val_arr_string = Arrays.toString(val_arr);
     int functions_length = functions.size();
     for (int i = 0; i < functions_length; i++) {
-      int[] current_function = functions.get(i);
-      if (Arrays.equals(val_arr, current_function)) {
-        int current_function_val = function_values.get(i);
+      String current_function = functions.get(i);
+      if (val_string.equals(current_function)) {
+        int current_function_val = function_values.get(i); //<>//
         this.value = current_function_val;
         return current_function_val;
       }
@@ -91,22 +102,34 @@ class Node {
     throw new Exception("Couldn't find the correct function.");
   }
   
-  void generateAllBinaryStrings(int n,
-                            int arr[], int i)
-                            {
-    if (i == n)
-    {
-        //printTheArray(arr, n);
-        boolean val_bool = new Random().nextDouble() < p;
-        int val = val_bool ? 1 : 0;
-        int[] current_arr = arr.clone(); 
-        functions.add(current_arr);
-        function_values.add(val);
-        return;
+  //void generateAllBinaryStrings(int n,
+  //                          int arr[], int i)
+  //                          {
+  //  if (i == n)
+  //  {
+  //      //printTheArray(arr, n);
+  //      boolean val_bool = new Random().nextDouble() < p;
+  //      int val = val_bool ? 1 : 0;
+  //      int[] current_arr = arr.clone(); 
+  //      functions.add(current_arr);
+  //      function_values.add(val);
+  //      return;
+  //  }
+  //  arr[i] = 0;
+  //  generateAllBinaryStrings(n, arr, i + 1);
+  //  arr[i] = 1;
+  //  generateAllBinaryStrings(n, arr, i + 1);
+  //}
+  
+    @Override
+    public boolean equals(Object o) {
+      if (o == this) {
+        return true;
+      }
+      if (!(o instanceof Node)) {
+            return false;
+      }
+      Node c = (Node) o;
+      return this.get_location().equals(c.get_location());
     }
-    arr[i] = 0;
-    generateAllBinaryStrings(n, arr, i + 1);
-    arr[i] = 1;
-    generateAllBinaryStrings(n, arr, i + 1);
-  }
 }

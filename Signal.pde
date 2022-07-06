@@ -2,7 +2,6 @@ class Signal {
   PVector location;
   Node source;
   Node target;
-  int source_value;
   
   Signal() {
   }
@@ -10,7 +9,7 @@ class Signal {
   Signal(Node source_node, Node target_node) {
     source = source_node;
     target = target_node;
-    source_value = source.get_value();
+    //source_value = source.get_value();
   }
   
   Node get_source() {
@@ -30,7 +29,7 @@ class Signal {
   }
   
   int get_source_value() {
-    return source_value;
+    return source.get_value();
   }
   
     @Override

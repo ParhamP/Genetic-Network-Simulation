@@ -31,4 +31,16 @@ static void printTheArray(int arr[])
     }
     System.out.println();
 }
- 
+
+ArrayList<String> generate_binary_strings(int k) {
+  
+  ArrayList<String> results = new ArrayList<>();
+  double num_strings = Math.pow(2, k);
+  int num_strings_int = (int) num_strings;
+  for (int i=0; i < num_strings_int; i++) {
+        String format_string = "%" + String.valueOf(k) + "s";
+        String current_binary = String.format(format_string, Integer.toBinaryString(i)).replace(' ', '0');
+        results.add(current_binary);
+      }
+      return results;
+    }
