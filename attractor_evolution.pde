@@ -52,7 +52,7 @@ void setup() {
 void draw() {
   
   if (time == 0) {
-    total = 6;
+    total = 5;
     seed = 2;
     generator = new Random(seed);
     
@@ -60,10 +60,12 @@ void draw() {
     network = new Network(total, p, generator);
     network.create_connections(k_n);
     
-    Node first_node = network.get_node(4);
-    first_node.additive_mutation();
+    Node first_node = network.get_node(3);
+    Node second_node = network.get_node(4);
+    network.connect(second_node, first_node);
+    first_node.removal_mutation();
     //network.connect(network.get_node(1), network.get_node(4));
-    first_node.additive_mutation();
+    //first_node.additive_mutation();
     //first_node.removal_mutation();
     //first_node.regulatory_mutation(0.99);
     
@@ -124,13 +126,18 @@ void draw() {
   //println("hello");
   network.update_state();
   //println(network_state);
-  //println(time);
+  println(time);
+
   }
   time = time + time_increment;
   
-  if (time % 500 == 0) {
 
+  if (time == 100) {
+  //Node first_node = network.get_node(2);
+  //first_node.additive_mutation();
   }
+  
+  
   
   
   //println("-------------------------");

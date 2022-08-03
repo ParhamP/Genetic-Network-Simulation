@@ -92,6 +92,11 @@ class Network {
     node_2.add_input(node_1);
   }
   
+  void disconnect(Node node_1, Node node_2) { // node_2 was receiving input node_1
+    node_1.remove_output(node_2);
+    node_2.remove_input(node_1);
+  }
+  
   
   void create_connections(int k_n) {
     ArrayList<Node> globe = nodes;
