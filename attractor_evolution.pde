@@ -52,7 +52,7 @@ void setup() {
 void draw() {
   
   if (time == 0) {
-    total = 5;
+    total = 10;
     seed = 2;
     generator = new Random(seed);
     
@@ -62,7 +62,9 @@ void draw() {
     
     Node first_node = network.get_node(3);
     Node second_node = network.get_node(4);
-    network.connect(second_node, first_node);
+    //network.connect(second_node, first_node);
+    network.disconnect(network.get_node(2), network.get_node(3));
+    network.disconnect(network.get_node(5), network.get_node(3));
     first_node.removal_mutation();
     //network.connect(network.get_node(1), network.get_node(4));
     //first_node.additive_mutation();

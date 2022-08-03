@@ -81,6 +81,7 @@ class Node {
     } else {
     input_signals.add(input_signal);
     input_signals_quantities.add(1);
+    generate_functions();
     }
   }
   
@@ -108,6 +109,7 @@ class Node {
     } else if (input_signal_quantity == 1) {
       input_signals.remove(input_signal_index);
       input_signals_quantities.remove(input_signal_index);
+      generate_functions();
     } 
   }
   
@@ -206,7 +208,6 @@ class Node {
       my_network.connect(selected_node, this);
       ArrayList<String> old_functions = (ArrayList) functions.clone();
       ArrayList<Integer> old_function_values = (ArrayList) function_values.clone();
-      generate_functions();
       for (int i = 0; i < functions.size(); i++) {
         String func = functions.get(i);
         char selected_node_char_value = func.charAt(func.length() - 1);
@@ -228,19 +229,21 @@ class Node {
   }
   
   void removal_mutation() {
-    int input_signals_size = input_signals.size(); //<>//
+    int input_signals_size = input_signals.size();
     println(input_signals);
     println(input_signals_quantities);
+    println(functions);
+    println(function_values);
     int selected_signal_index = getRandomNumber(generator, 0, input_signals_size);
     println(selected_signal_index);
     Signal selected_signal = input_signals.get(selected_signal_index);
     println(selected_signal);
     int selected_signal_quantity = input_signals_quantities.get(selected_signal_index);
     
-    Node source_node = selected_signal.get_source();
+    Node source_node = selected_signal.get_source(); //<>//
     
     if (selected_signal_quantity > 1) {
-      my_network.disconnect(source_node, this); //<>//
+      my_network.disconnect(source_node, this);
       println(input_signals);
       println(input_signals_quantities);
       for (int i = 0; i < functions.size(); i++) {
@@ -253,13 +256,18 @@ class Node {
           function_values.set(i, val);
         }
       }
-    } else if (selected_signal_quantity == 1) {
+    } else if (selected_signal_quantity == 1 && input_signals.size() > 1) {
       ArrayList<String> old_functions = (ArrayList) functions.clone();
       ArrayList<Integer> old_function_values = (ArrayList) function_values.clone();
+      println(input_signals);
+      println(input_signals_quantities);
+      println(functions);
+      println(function_values);
       my_network.disconnect(source_node, this);
       println(input_signals);
       println(input_signals_quantities);
-      generate_functions();
+      println(functions);
+      println(function_values);
       for (int i = 0; i < old_functions.size(); i++) {
         String old_func = old_functions.get(i);
         int old_func_value = old_function_values.get(i);
@@ -269,6 +277,8 @@ class Node {
           String new_func_version_part_1 = old_func.substring(0, selected_signal_index);
           String new_func_version_part_2 = old_func.substring(selected_signal_index + 1);
           String new_func_version = new_func_version_part_1 + new_func_version_part_2;
+          println(functions);
+          println(new_func_version);
           int new_func_index = functions.indexOf(new_func_version);
           function_values.set(new_func_index, old_func_value);
         }
