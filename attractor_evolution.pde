@@ -5,37 +5,139 @@ import java.lang.Math;
 Network network;
 float time = 0;
 float time_increment = 1;
-int k_n = 4;
+int k_n = 3;
 float p = 0.5;
 int[] first_state;
 int attractor_count = 0;
+int total;
+int seed;
+Random generator;
+ArrayList<String> S;
+ArrayList<ArrayList<String>> attractors;
+
+
 
 void setup() {
   size(900, 900, P3D); 
   frameRate(60);
   cam = new PeasyCam(this, 2000);
   cam.rotateX(90);
-  int total = 100;
-  network = new Network(total, p);
-  //println(network.size());
-  network.create_connections(k_n);
+
+
+  
+  //ArrayList<String> x = generate_binary_strings(10, 500);
+  
+  //println(x.size());
+  
+  
+  //int[] x = new int[(int) Math.pow(2, 25)];
+  
+  //for (int i = 0; i < Math.pow(2, 25); i++) {
+  //  x[i] = i;
+  //}
+  
+  //println(network.binary_functions_archive);
+  //println(network.get_state_attractor("0110"));
+  //network.set_state_attractor("0110", 12);
+  //println(network.get_state_attractor("0110"));
+  //network.set_state_attractor("0110", 4);
+  //println(network.get_state_attractor("0110"));
+  //println(network.state_attractor_numbers);
   //network = create_sphere(r, total, p);
   //create_connections(network, k_n);
   //evolve();
-  noLoop();
+  //noLoop();
 }
 
 void draw() {
+  
+  if (time == 0) {
+    total = 5;
+    seed = 1;
+    generator = new Random(seed);
+    
+    
+    network = new Network(total, p, generator);
+    network.create_connections(k_n);
+    
+    Node first_node = network.get_node(3);
+    first_node.regulatory_mutation(0.99);
+    
+    //S = generate_binary_strings(total, (int) 1000, generator);
+    
+    //println(S.size());
+  
+    //attractors = network.get_attractors(S);
+    //println(attractors.size());
+    //println(attractors);
+    
+    
+    
+    
+  }
+  
+  //Population p = new Population(75);
+  //p.initialize_networks(1000, 10, 0.5, 4);
+  
+  //println(p.get_num_networks());
+  
+  //ArrayList<String> S;
+  //if (total <= 10) {
+  //  S = generate_binary_strings(total);
+  //} else {
+  //  S = generate_binary_strings(total, 5000);
+  //}
+  
+  //Network copiedStd = (Network) network.clone();
+  //Network cloned_network = new Network(network);
+  
+  
+  //println(S);
+  
+  
+  //println("done");
+  //println(S.size());
+  
+  //println("---------");
+  
+  
+  
+  //println(attractors.size());
+  //println(attractors);
+  
+  
   background(0);
   lights();
+  
+  //String temp_state = network.get_network_state();
+  //println(temp_state);
+  
+  
   draw_sphere(network);
   draw_connections(network);
-  if (time % 15 == 0) {
-  int[] network_state = network.update_state();
-  //printTheArray(network_state);
+  
+  if (time % 30 == 0) {
+  //println("hello");
+  network.update_state();
+  //println(network_state);
+  println(time);
   }
   time = time + time_increment;
   
+  if (time % 500 == 0) {
+
+  }
+  
+  
+  //println("-------------------------");
+  
+  //println(network.binary_functions_archive);
+  
+  //network.create_connections(k_n + 1);
+  
+  //println(network.binary_functions_archive);
+  
+  //generate_binary_strings(20);
   //println(Integer.toBinaryString(10));
   //ArrayList<String> binaries = new ArrayList<String>();
   
@@ -64,12 +166,18 @@ void draw() {
   
   //int[] myArr = {1, 0, 0, 1, 1, 0, 1, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 1, 0};
   
-  //int[] updated_myArr = network.update_state(myArr);
   
-  //printTheArray(updated_myArr);
   
-  //updated_myArr = network.update_state(tempArr);
-  //printTheArray(updated_myArr);
+  //String myArr = "1010110010";
+  
+  //String updated_myArr = network.update_state(myArr);
+  
+  //println(updated_myArr); // expected: 0010001110
+  //println("-------------------------");
+  
+  
+  //updated_myArr = network.update_state(temp_state);
+  //println(updated_myArr);
   
   
   
@@ -176,4 +284,7 @@ void draw() {
 
 void mousePressed() {
   //time = time + time_increment;
+  //ArrayList<String> x = generate_binary_strings(total, 1, generator);
+  //String my_state = x.get(0);
+  //network.set_node_values(my_state);
 }

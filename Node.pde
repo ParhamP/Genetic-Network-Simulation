@@ -8,6 +8,9 @@ class Node {
   //HashMap<ArrayList<Integer>, Integer> functions;
   ArrayList<String> functions;
   ArrayList<Integer> function_values;
+  //int seed = 0;
+  Random generator;
+  Network my_network;
   
   Node() {
   }
@@ -18,7 +21,20 @@ class Node {
     input_signals = new LinkedHashSet<Signal>();
     output_signals = new LinkedHashSet<Signal>();
     value = -1; // indicates it hasn't been calculated yet
-    boolean val_bool = new Random().nextDouble() < 0.5;
+    generator = new Random();
+    boolean val_bool = generator.nextDouble() < 0.5;
+    value = val_bool ? 1 : 0;
+    //k_max = 12;
+  }
+  
+ Node(float x, float y, float z, float bias, Random my_generator) {
+    set_location(x, y, z);
+    p = bias;
+    input_signals = new LinkedHashSet<Signal>();
+    output_signals = new LinkedHashSet<Signal>();
+    value = -1; // indicates it hasn't been calculated yet
+    generator = my_generator;
+    boolean val_bool = generator.nextDouble() < 0.5;
     value = val_bool ? 1 : 0;
     //k_max = 12;
     functions = new ArrayList<String>();
@@ -33,8 +49,16 @@ class Node {
     return location;
   }
   
+  void set_my_network(Network network) {
+    my_network = network;
+  }
+  
   LinkedHashSet<Signal> get_output_signals() {
     return output_signals;
+  }
+  
+  LinkedHashSet<Signal> get_input_signals() {
+    return input_signals;
   }
   
   void add_input(Node input_node) {
@@ -66,35 +90,42 @@ class Node {
     value = val;
   }
   
-  void generate_functions() {
+  
+  void generate_functions() { // whenever a new input node is added to me, I need to generate functions again
     int k = input_signals.size();
     functions = generate_binary_strings(k);
+    function_values = new ArrayList<Integer>();
     for (int i = 0; i < functions.size(); i++) {
-      boolean val_bool = new Random().nextDouble() < p;
+      boolean val_bool = generator.nextDouble() < p;
+      int val = val_bool ? 1 : 0;
+      function_values.add(val);
+    }
+  }
+  
+  void generate_functions(ArrayList<String> funcs) { // whenever a new input node is added to me, I need to generate functions again
+    //int k = input_signals.size();
+    this.functions = funcs;
+    function_values = new ArrayList<Integer>();
+    for (int i = 0; i < functions.size(); i++) {
+      boolean val_bool = generator.nextDouble() < p;
       int val = val_bool ? 1 : 0;
       function_values.add(val);
     }
   }
   
   int calculate_value() throws Exception{
-    int k = input_signals.size();
-    //int[] val_arr = new int[k];
     String val_string = "";
-    //int val_arr_index = 0;
     Iterator<Signal> it = input_signals.iterator();
     while (it.hasNext()) {
       Signal current_signal = it.next();
       int current_input_val = current_signal.get_source_value();
       val_string = val_string + String.valueOf(current_input_val);
-      //val_arr[val_arr_index] = current_input_val;
-      //val_arr_index = val_arr_index + 1;
     }
-    //String val_arr_string = Arrays.toString(val_arr);
     int functions_length = functions.size();
     for (int i = 0; i < functions_length; i++) {
       String current_function = functions.get(i);
       if (val_string.equals(current_function)) {
-        int current_function_val = function_values.get(i); //<>//
+        int current_function_val = function_values.get(i);
         this.value = current_function_val;
         return current_function_val;
       }
@@ -102,24 +133,86 @@ class Node {
     throw new Exception("Couldn't find the correct function.");
   }
   
-  //void generateAllBinaryStrings(int n,
-  //                          int arr[], int i)
-  //                          {
-  //  if (i == n)
-  //  {
-  //      //printTheArray(arr, n);
-  //      boolean val_bool = new Random().nextDouble() < p;
-  //      int val = val_bool ? 1 : 0;
-  //      int[] current_arr = arr.clone(); 
-  //      functions.add(current_arr);
-  //      function_values.add(val);
-  //      return;
-  //  }
-  //  arr[i] = 0;
-  //  generateAllBinaryStrings(n, arr, i + 1);
-  //  arr[i] = 1;
-  //  generateAllBinaryStrings(n, arr, i + 1);
-  //}
+  void additive_mutation() {
+    int my_network_size = my_network.size(); //<>//
+    Node selected_node = this;
+    println(selected_node);
+    while (selected_node.equals(this)) {
+      int selected_node_index = getRandomNumber(generator, 0, my_network_size);
+      selected_node = my_network.get_node(selected_node_index);
+    }
+    println(selected_node);
+    println(input_signals);
+    boolean exists_already = false;
+    Iterator<Signal> it = input_signals.iterator();
+    int input_index = 0;
+    while (it.hasNext()) {
+      Signal current_signal = it.next();
+      Node source = current_signal.get_source();
+      
+      if (selected_node.equals(source)) {
+        exists_already = true;
+        break;
+      }
+      input_index = input_index + 1;
+    }
+    if (exists_already) {
+      add_input(selected_node);
+      for (int i = 0; i < functions.size(); i++) {
+        String func = functions.get(i);
+        char selected_node_char_value = func.charAt(input_index);
+        int selected_node_value = Character.getNumericValue(selected_node_char_value);
+        if (selected_node_value == 1) {
+          boolean val_bool = generator.nextDouble() < p;
+          int val = val_bool ? 1 : 0;
+          function_values.set(i, val);
+        }
+      }
+    } else {
+      add_input(selected_node);
+      ArrayList<String> old_functions = (ArrayList) functions.clone();
+      ArrayList<Integer> old_function_values = (ArrayList) function_values.clone();
+      generate_functions();
+      for (int i = 0; i < functions.size(); i++) {
+        String func = functions.get(i);
+        char selected_node_char_value = func.charAt(func.length() - 1);
+        int selected_node_value = Character.getNumericValue(selected_node_char_value);
+        String old_func_version = func.substring(0, func.length() - 1);
+        int old_func_index = old_functions.indexOf(old_func_version);
+        int old_func_value = old_function_values.get(old_func_index);
+        if (selected_node_value == 0) {
+          function_values.set(i, old_func_value);
+        } else {
+          boolean val_bool = generator.nextDouble() < p;
+          int val = val_bool ? 1 : 0;
+          function_values.set(i, val);
+        }
+      }
+    }
+    println(input_signals); //<>//
+  }
+  
+  void removal_mutation() {
+    
+  }
+  
+  void regulatory_mutation(float u) {
+    Double prob = generator.nextDouble();
+    if (prob < (1 - u)) {
+      return;
+    } else if (prob < (1 -  (u / 2))) {
+      additive_mutation();
+    } else {
+      removal_mutation();
+    }
+  }
+  
+   @Override
+   public String toString() {
+     int node_num_in_network = my_network.get_node_number(this);
+      return String.valueOf(node_num_in_network);
+   }
+   
   
     @Override
     public boolean equals(Object o) {

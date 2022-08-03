@@ -5,22 +5,44 @@ class Network {
   ArrayList<Node> nodes;
   int k;
   float r = 700;
-  ArrayList<int[]> states;
-  ArrayList<Integer> state_attractor_numbers;
+  HashMap<String, Integer> state_attractor_numbers;
+  HashMap<Integer, ArrayList<String>> binary_functions_archive;
+  Random generator;
+  ArrayList<ArrayList<String>> attractors;
   
   Network() {
   }
   
-  Network(Integer num_nodes, float bias) {
+  Network(Integer num_nodes, float bias, Random my_generator) {
+      generator = my_generator;
       total = num_nodes;
       p = bias;
       nodes = create_sphere();
-      states = new ArrayList<int[]>();
-      state_attractor_numbers = new ArrayList<Integer>();
+      binary_functions_archive = new HashMap<Integer, ArrayList<String>>();
+      state_attractor_numbers = new HashMap<String, Integer>();
   }
+  
+  //Network(Network network) {
+  //  this.total = network.total;
+  //  this.p = network.p;
+  //  this.nodes = (ArrayList<Node>) network.nodes.clone();
+  //  this.k = network.k;
+  //  this.r = network.r;
+  //  this.state_attractor_numbers = (HashMap<String, Integer>) network.state_attractor_numbers.clone();
+  //  this.binary_functions_archive = (HashMap<Integer, ArrayList<String>>) network.binary_functions_archive.clone();
+  //  this.generator = network.generator;
+  //}
   
   ArrayList<Node> get_nodes() {
     return nodes;
+  }
+  
+  Node get_node(int i) {
+    return nodes.get(i);
+  }
+  
+  int get_node_number(Node node) {
+    return nodes.indexOf(node);
   }
   
   ArrayList<Node> create_sphere() {
@@ -35,7 +57,10 @@ class Network {
         float x = r * sin(lat) * cos(lon);
         float y = r * sin(lat) * sin(lon);
         float z = r * cos(lat);
-        Node current_node = new Node(x, y, z, p);
+        
+        Node current_node = new Node(x, y, z, p, generator);
+        current_node.set_my_network(this);
+        
         if (globe.contains(current_node)) {
           miss_count = miss_count + 1;
           println(x);
@@ -49,7 +74,7 @@ class Network {
         globe.add(current_node);
         add_count = add_count + 1;
         if (add_count == total) {
-          println("All nodes were added.");
+          //println("All nodes were added.");
           return globe;
         }
         //total_count = total_count + 1;
@@ -62,8 +87,14 @@ class Network {
      return globe;
   }
   
+  
   void create_connections(int k_n) {
     ArrayList<Node> globe = nodes;
+    if (!binary_functions_archive.containsKey(k_n)) {
+      ArrayList<String> function_strings = generate_binary_strings(k_n);
+      binary_functions_archive.put(k_n, function_strings);
+    }
+    ArrayList<String> functions = binary_functions_archive.get(k_n);
     int total = globe.size();
     for (int i = 0; i < total; i++) {
       Node n1 = globe.get(i);
@@ -76,7 +107,8 @@ class Network {
         }
         list.add(k);
       }
-      Collections.shuffle(list);
+      
+      Collections.shuffle(list, generator);
       for (int j = 0; j < k_n; j++) {
         int other_node_index = list.get(j);
         Node n2 = globe.get(other_node_index);
@@ -87,15 +119,16 @@ class Network {
         }
         n1.add_input(n2);
       }
-      n1.generate_functions();
+      n1.generate_functions(functions);
     }
     k = k_n;
   }
   
-  int[] update_state() {
+  String update_state() {
     ArrayList<Node> globe = nodes;
     int total = globe.size();
-    int[] results = new int[total];
+    //int[] results = new int[total];
+    String results = "";
     for (int i = 0; i < total; i++) {
       Node n1 = globe.get(i);
       //int current_value = n1.get_value();
@@ -105,26 +138,27 @@ class Network {
           println(e);
         }
         int current_value = n1.get_value();
-        results[i] = current_value;
+        results = results + String.valueOf(current_value);
       }
       return results;
     }
     
-  int[] update_state(int[] state) {
+  String update_state(String state) {
     set_node_values(state);
     return update_state();
   }
     
-  void set_node_values(int [] state) {
+  void set_node_values(String state) {
     ArrayList<Node> globe = nodes;
     int total = globe.size();
+    char[] state_chars = state.toCharArray();
     for (int i = 0; i < total; i++) {
-      int current_state_val = state[i]; 
+      char current_state_val_char = state_chars[i];
+      int current_state_val = Character.getNumericValue(current_state_val_char);
       Node n1 = globe.get(i);
       n1.set_value(current_state_val);
     }
   }
-    
     
   float average_sensetivity() {
     return 2 * p * (1 - p) * k;
@@ -135,45 +169,88 @@ class Network {
     return nodes.size();
   }
   
-  int[] get_network_state() {
+  String get_network_state() {
     ArrayList<Node> globe = nodes;
     int total = globe.size();
-    int[] results = new int[total];
+    //int[] results = new int[total];
+    String results = "";
     for (int i = 0; i < total; i++) {
       Node n1 = globe.get(i);
       int current_value = n1.get_value();
-        results[i] = current_value;
+      results = results + String.valueOf(current_value);
       }
     return results;
   }
   
-  ArrayList<ArrayList<Integer>> get_attractors(ArrayList<int[]> S) { // S -> start states
-  int currentAttractor = 0;
-  ArrayList<ArrayList<Integer>> resultList = new ArrayList<ArrayList<Integer>>();
+  void set_state_attractor(String state_string, int attractor_num) {
+    state_attractor_numbers.put(state_string, attractor_num);
+  }
   
-    
-    
-    
-    
+  Integer get_state_attractor(String state_string) {
+    if (state_attractor_numbers.containsKey(state_string)) {
+      Integer attractor_num = state_attractor_numbers.get(state_string);
+      return attractor_num;
+    } else {
+      return 0;
+    }
+  }
+  
+  ArrayList<ArrayList<String>> get_attractors(ArrayList<String> S) { // S -> start states
+    String orig_state = get_network_state();
+    int currentAttractor = 0;
+    ArrayList<ArrayList<String>> resultList = new ArrayList<ArrayList<String>>();
+    state_attractor_numbers = new HashMap<String, Integer>();
+    for(String startState : S) {
+      if (get_state_attractor(startState) == 0) {
+        String current = startState;
+        currentAttractor = currentAttractor + 1;
+        while (get_state_attractor(current) == 0) {
+          set_state_attractor(current, currentAttractor);
+          current = update_state(current);
+        }
+        int current_state_attractor = get_state_attractor(current);
+        if (current_state_attractor == currentAttractor) {
+          String attractorStart = current;
+          ArrayList<String> attractor = new ArrayList<String>();
+          do {
+            attractor.add(current);
+            current = update_state(current);
+          } while (!current.equals(attractorStart));
+          resultList.add(attractor);
+        } else {
+          String attractorStart = current;
+          Integer attractorStartNum = get_state_attractor(attractorStart);
+          current = startState;
+          while (!current.equals(attractorStart)) {
+            set_state_attractor(current, attractorStartNum);
+            current = update_state(current);
+          }
+        }
+      }
+    }
+    set_node_values(orig_state);
+    attractors = resultList;
     return resultList;
   }
   
-  
-  void generateAllBinaryStrings(int n,
-                            int arr[], int i)
-                            {
-    if (i == n)
-    {
-        int[] current_arr = arr.clone();
-        states.add(current_arr);
-        state_attractor_numbers.add(0);
-        return;
-    }
-    arr[i] = 0;
-    generateAllBinaryStrings(n, arr, i + 1);
-    arr[i] = 1;
-    generateAllBinaryStrings(n, arr, i + 1);
+  boolean is_in_attractor_state() {
+  String state = get_network_state();
+  if (attractors == null || attractors.isEmpty()) {
+    return false;
   }
+  for (ArrayList<String> s_a : attractors) {
+    for (String s : s_a) {
+      if (s.equals(state)) {
+        //println("yes");
+        return true;
+      }
+    }
+  }
+  //println("no");
+  return false;
+}
+  
+
   
   
   

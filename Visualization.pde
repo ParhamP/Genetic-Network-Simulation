@@ -14,7 +14,12 @@ void draw_sphere(Network network) {
     }
     else if (n_value == 1) {
       //stroke(82, 179, 235);
+      if (network.is_in_attractor_state()) {
+        stroke(51, 249, 255);
+      } else {
       stroke(255, 249, 51);
+      }
+      //stroke(R, G, B);
     }
     point(v.x, v.y, v.z);
   }
@@ -36,8 +41,11 @@ void draw_connections(Network network) {
         //stroke(227, 104, 104);
         stroke(202, 51, 255);
       } else if (current_output_signal.get_source_value() == 1) {
-        //stroke(82, 179, 235);
-        stroke(255, 249, 51);
+        if (network.is_in_attractor_state()) {
+          stroke(51, 249, 255);
+        } else {
+          stroke(255, 249, 51);
+        }
       }
       line(v1.x, v1.y, v1.z, v2.x, v2.y, v2.z);
     }

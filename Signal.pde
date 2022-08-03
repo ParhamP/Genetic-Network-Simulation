@@ -9,7 +9,6 @@ class Signal {
   Signal(Node source_node, Node target_node) {
     source = source_node;
     target = target_node;
-    //source_value = source.get_value();
   }
   
   Node get_source() {
@@ -48,4 +47,9 @@ class Signal {
     public int hashCode() {
         return Objects.hash(source, target);
     }
+    
+   @Override
+   public String toString() {
+     return "[" + String.valueOf(source) + " -> " + String.valueOf(target) + "]";
+   }
 }
