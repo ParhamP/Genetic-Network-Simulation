@@ -52,16 +52,20 @@ void setup() {
 void draw() {
   
   if (time == 0) {
-    total = 5;
-    seed = 1;
+    total = 6;
+    seed = 2;
     generator = new Random(seed);
     
     
     network = new Network(total, p, generator);
     network.create_connections(k_n);
     
-    Node first_node = network.get_node(3);
-    first_node.regulatory_mutation(0.99);
+    Node first_node = network.get_node(4);
+    first_node.additive_mutation();
+    //network.connect(network.get_node(1), network.get_node(4));
+    first_node.additive_mutation();
+    //first_node.removal_mutation();
+    //first_node.regulatory_mutation(0.99);
     
     //S = generate_binary_strings(total, (int) 1000, generator);
     
@@ -116,11 +120,11 @@ void draw() {
   draw_sphere(network);
   draw_connections(network);
   
-  if (time % 30 == 0) {
+  if (time % 15 == 0) {
   //println("hello");
   network.update_state();
   //println(network_state);
-  println(time);
+  //println(time);
   }
   time = time + time_increment;
   

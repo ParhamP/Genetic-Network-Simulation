@@ -87,6 +87,11 @@ class Network {
      return globe;
   }
   
+  void connect(Node node_1, Node node_2) { // node_2 receives input node_1
+    node_1.add_output(node_2);
+    node_2.add_input(node_1);
+  }
+  
   
   void create_connections(int k_n) {
     ArrayList<Node> globe = nodes;
@@ -117,7 +122,8 @@ class Network {
         if (dist < 1.0) {
           continue;
         }
-        n1.add_input(n2);
+        //n1.receive_input(n2);// fix this
+        connect(n2, n1);
       }
       n1.generate_functions(functions);
     }

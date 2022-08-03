@@ -2,6 +2,7 @@ class Signal {
   PVector location;
   Node source;
   Node target;
+  //int quantity;
   
   Signal() {
   }
@@ -9,6 +10,7 @@ class Signal {
   Signal(Node source_node, Node target_node) {
     source = source_node;
     target = target_node;
+    //set_quantity(1);
   }
   
   Node get_source() {
@@ -18,6 +20,14 @@ class Signal {
   Node get_target() {
     return target;
   }
+  
+  //void set_quantity(int num) {
+  //  quantity = num;
+  //}
+  
+  //int get_quantity() {
+  //  return quantity;
+  //}
   
   PVector get_source_location() {
     return source.get_location();

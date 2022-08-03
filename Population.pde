@@ -21,21 +21,21 @@ class Population {
     }
   }
   
-  void mutate_population() {
-    for (Network network : population) {
-      ArrayList<Node> nodes = network.get_nodes();
-      for (Node node : nodes) {
-        LinkedHashSet<Signal> output_signals = node.get_output_signals();
-        Iterator<Signal> it = output_signals.iterator();
-        while (it.hasNext()) {
-          Signal current_signal = it.next();
-          Node target = current_signal.get_target();
-          target.regulatory_mutation(u);
+  //void mutate_population() {
+  //  for (Network network : population) {
+  //    ArrayList<Node> nodes = network.get_nodes();
+  //    for (Node node : nodes) {
+  //      LinkedHashSet<Signal> output_signals = node.get_output_signals();
+  //      Iterator<Signal> it = output_signals.iterator();
+  //      while (it.hasNext()) {
+  //        Signal current_signal = it.next();
+  //        Node target = current_signal.get_target();
+  //        target.regulatory_mutation(u);
           
-        }
-      }
-    }
-  }
+  //      }
+  //    }
+  //  }
+  //}
   
   
   int get_num_networks() {

@@ -31,7 +31,7 @@ void draw_connections(Network network) {
   //stroke(202, 51, 255);
   for (int i = 0; i < globe.size(); i++) {
     Node current_node = globe.get(i);
-    LinkedHashSet<Signal> current_output_signals = current_node.get_output_signals();
+    ArrayList<Signal> current_output_signals = current_node.get_output_signals();
     Iterator<Signal> it = current_output_signals.iterator();
     while (it.hasNext()) {
       Signal current_output_signal = it.next();
