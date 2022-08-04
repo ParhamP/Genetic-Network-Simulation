@@ -7,6 +7,8 @@ float time = 0;
 float time_increment = 1;
 int k_n = 3;
 float p = 0.5;
+int k_max = 6; // orig 12
+int n_max = 50; // orig 100
 int[] first_state;
 int attractor_count = 0;
 int total;
@@ -57,7 +59,7 @@ void draw() {
     generator = new Random(seed);
     
     
-    network = new Network(total, p, generator);
+    network = new Network(total, p, k_max, n_max, generator);
     network.create_connections(k_n);
     
     //Node first_node = network.get_node(3);
@@ -80,11 +82,11 @@ void draw() {
     //println(attractors);
     
     
-    Population p = new Population(100);
+    Population pop = new Population(k_max, n_max);
     
-    p.initialize_networks(100, 10, 0.5, 4);
+    pop.initialize_networks(1000, 10, 0.5, 4);
     
-    p.mutate_population();
+    pop.mutate_population();
     
 }
   

@@ -4,18 +4,26 @@ class Population {
   Random generator;
   int seed;
   float u;
+  int k_max;
   
-  Population(int max_num_networks) {
-    n_max = max_num_networks;
+  Population(int max_num_inputs, int max_num_nodes) {
+    k_max = max_num_inputs;
+    n_max = max_num_nodes; // orig 100
     u = 0.01;
     seed = 1;
     generator = new Random(seed);
   }
   
-  void initialize_networks(int m_0, int n, float p, int k_0) {
+  void initialize_networks(int num_networks, int n, float p, int k_0) {
+    if (k_0 > k_max) {
+      k_0 = k_max;
+    }
+    if (n > n_max) {
+      n = n_max;
+    }
     population = new ArrayList<Network>();
-    for (int m = 0; m < m_0; m++) {
-      Network new_network = new Network(n, p, generator);
+    for (int m = 0; m < num_networks; m++) {
+      Network new_network = new Network(n, p, k_max, n_max, generator);
       new_network.create_connections(k_0);
       population.add(new_network);
     }
@@ -23,11 +31,8 @@ class Population {
   
   void mutate_population() {
     for (Network network : population) {
-      
       ArrayList<Node> nodes = network.get_nodes();
-      
       for (Node node : nodes) {
-        
         // Regulatory Mutation
         int num_regulators = node.num_regulators();
         for (int i = 0; i < num_regulators; i++) {
@@ -40,7 +45,6 @@ class Population {
             node.regulatory_subtractive_mutation();
           }
         }
-        
         // Coding Mutation
         double num_outputs = (double) node.num_output_connections();
         double b = generator.nextDouble();

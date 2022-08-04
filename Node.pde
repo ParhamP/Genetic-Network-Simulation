@@ -1,16 +1,13 @@
 class Node {
   PVector location;
   int value;
-  //LinkedHashSet<Signal> input_signals;
-  //LinkedHashSet<Signal> output_signals;
   ArrayList<Integer> input_signals_quantities;
   ArrayList<Integer> output_signals_quantities;
   
   ArrayList<Signal> input_signals;
   ArrayList<Signal> output_signals;
   float p; // bias
-  //int k_max; // max num of input signals
-  //HashMap<ArrayList<Integer>, Integer> functions;
+  int k_max; // max num of input signals
   ArrayList<String> functions;
   ArrayList<Integer> function_values;
   //int seed = 0;
@@ -20,11 +17,10 @@ class Node {
   Node() {
   }
   
-  Node(float x, float y, float z, float bias) {
+  Node(float x, float y, float z, float bias, int max_num_inputs) {
     set_location(x, y, z);
     p = bias;
-    //input_signals = new LinkedHashSet<Signal>();
-    //output_signals = new LinkedHashSet<Signal>();
+    k_max = max_num_inputs;
     input_signals_quantities = new ArrayList<Integer>();
     output_signals_quantities = new ArrayList<Integer>();
     input_signals = new ArrayList<Signal>();
@@ -35,11 +31,10 @@ class Node {
     value = val_bool ? 1 : 0;
   }
   
- Node(float x, float y, float z, float bias, Random my_generator) {
+ Node(float x, float y, float z, float bias, int max_num_inputs, Random my_generator) {
     set_location(x, y, z);
     p = bias;
-    //input_signals = new LinkedHashSet<Signal>();
-    //output_signals = new LinkedHashSet<Signal>();
+    k_max = max_num_inputs;
     input_signals_quantities = new ArrayList<Integer>();
     output_signals_quantities = new ArrayList<Integer>();
     input_signals = new ArrayList<Signal>();
@@ -93,6 +88,9 @@ class Node {
       input_signals_quantities.set(input_signal_index, input_signal_quantity + 1);
       update_functions_after_duplicate_signal_added(input_signal_index);
     } else {
+      if (num_regulators() >= k_max) {
+        return;
+      }
       ArrayList<String> old_functions = (ArrayList) functions.clone();
       ArrayList<Integer> old_function_values = (ArrayList) function_values.clone();
       input_signals.add(input_signal);
@@ -331,7 +329,7 @@ class Node {
     ArrayList<Node> targets = find_output_targets(num_affected_targets);
     for (int i = 0; i < num_affected_targets; i++) {
       Node target = targets.get(i);
-      my_network.disconnect(this, target); //<>//
+      my_network.disconnect(this, target);
     }
   }
   

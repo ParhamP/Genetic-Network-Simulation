@@ -2,6 +2,8 @@ class Network {
   //float r;
   Integer total;
   float p;
+  int k_max; // max num of input signals
+  int n_max; // max num of nodes
   ArrayList<Node> nodes;
   int k;
   float r = 700;
@@ -13,25 +15,17 @@ class Network {
   Network() {
   }
   
-  Network(Integer num_nodes, float bias, Random my_generator) {
+  Network(Integer num_nodes, float bias, int max_num_inputs, int max_num_nodes,
+          Random my_generator) {
       generator = my_generator;
       total = num_nodes;
       p = bias;
+      k_max = max_num_inputs;
+      n_max = max_num_nodes;
       nodes = create_sphere();
       binary_functions_archive = new HashMap<Integer, ArrayList<String>>();
       state_attractor_numbers = new HashMap<String, Integer>();
   }
-  
-  //Network(Network network) {
-  //  this.total = network.total;
-  //  this.p = network.p;
-  //  this.nodes = (ArrayList<Node>) network.nodes.clone();
-  //  this.k = network.k;
-  //  this.r = network.r;
-  //  this.state_attractor_numbers = (HashMap<String, Integer>) network.state_attractor_numbers.clone();
-  //  this.binary_functions_archive = (HashMap<Integer, ArrayList<String>>) network.binary_functions_archive.clone();
-  //  this.generator = network.generator;
-  //}
   
   ArrayList<Node> get_nodes() {
     return nodes;
@@ -58,7 +52,7 @@ class Network {
         float y = r * sin(lat) * sin(lon);
         float z = r * cos(lat);
         
-        Node current_node = new Node(x, y, z, p, generator);
+        Node current_node = new Node(x, y, z, p, k_max, generator);
         current_node.set_my_network(this);
         
         if (globe.contains(current_node)) {
