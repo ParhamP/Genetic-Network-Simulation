@@ -71,17 +71,34 @@ class Node {
     return input_signals;
   }
   
+  int num_regulators() {
+    return input_signals.size();
+  }
+  
+  int num_output_connections() {
+    return output_signals.size();
+  }
   
   void add_input(Node source_node) {
     Signal input_signal = new Signal(source_node, this);
+    if (input_signals.isEmpty()) {
+      input_signals.add(input_signal);
+      input_signals_quantities.add(1);
+      generate_functions();
+      return;
+    }
     if (input_signals.contains(input_signal)) {
       int input_signal_index = input_signals.indexOf(input_signal);
       int input_signal_quantity = input_signals_quantities.get(input_signal_index);
       input_signals_quantities.set(input_signal_index, input_signal_quantity + 1);
+      update_functions_after_duplicate_signal_added(input_signal_index);
     } else {
-    input_signals.add(input_signal);
-    input_signals_quantities.add(1);
-    generate_functions();
+      ArrayList<String> old_functions = (ArrayList) functions.clone();
+      ArrayList<Integer> old_function_values = (ArrayList) function_values.clone();
+      input_signals.add(input_signal);
+      input_signals_quantities.add(1);
+      generate_functions();
+      update_functions_after_new_signal_added(old_functions, old_function_values);
     }
   }
   
@@ -106,11 +123,16 @@ class Node {
     int input_signal_quantity = input_signals_quantities.get(input_signal_index);
     if (input_signal_quantity > 1) {
       input_signals_quantities.set(input_signal_index, input_signal_quantity - 1);
-    } else if (input_signal_quantity == 1) {
+      update_functions_after_duplicate_signal_removed(input_signal_index);
+    } else if (input_signal_quantity == 1 && input_signals.size() > 1) {
+      ArrayList<String> old_functions = (ArrayList) functions.clone();
+      ArrayList<Integer> old_function_values = (ArrayList) function_values.clone();
       input_signals.remove(input_signal_index);
       input_signals_quantities.remove(input_signal_index);
       generate_functions();
-    } 
+      update_functions_after_singular_signal_removed(input_signal_index, old_functions,
+                                                     old_function_values);
+    }
   }
   
   void remove_output(Node target_node) {
@@ -179,130 +201,140 @@ class Node {
     throw new Exception("Couldn't find the correct function.");
   }
   
-  void additive_mutation() {
+  void update_functions_after_duplicate_signal_added(int input_index) {
+    for (int i = 0; i < functions.size(); i++) {
+      String func = functions.get(i);
+      char selected_node_char_value = func.charAt(input_index);
+      int selected_node_value = Character.getNumericValue(selected_node_char_value);
+      if (selected_node_value == 1) {
+        boolean val_bool = generator.nextDouble() < p;
+        int val = val_bool ? 1 : 0;
+        function_values.set(i, val);
+      }
+    }
+  }
+  
+  void update_functions_after_duplicate_signal_removed(int selected_signal_index) {
+    for (int i = 0; i < functions.size(); i++) {
+      String func = functions.get(i);
+      char selected_node_char_value = func.charAt(selected_signal_index);
+      int selected_node_value = Character.getNumericValue(selected_node_char_value);
+      if (selected_node_value == 1) {
+        boolean val_bool = generator.nextDouble() < p;
+        int val = val_bool ? 1 : 0;
+        function_values.set(i, val);
+      }
+    }
+  }
+  
+  void update_functions_after_singular_signal_removed(int selected_signal_index,
+                                                      ArrayList<String> old_functions,
+                                                      ArrayList<Integer> old_function_values) {
+    for (int i = 0; i < old_functions.size(); i++) {
+      String old_func = old_functions.get(i);
+      int old_func_value = old_function_values.get(i);
+      char selected_node_char_value = old_func.charAt(selected_signal_index);
+      int selected_node_value = Character.getNumericValue(selected_node_char_value);
+      if (selected_node_value == 0) {
+        String new_func_version_part_1 = old_func.substring(0, selected_signal_index);
+        String new_func_version_part_2 = old_func.substring(selected_signal_index + 1);
+        String new_func_version = new_func_version_part_1 + new_func_version_part_2;
+        int new_func_index = functions.indexOf(new_func_version);
+        function_values.set(new_func_index, old_func_value);
+      }
+    }
+  }
+  
+  void update_functions_after_new_signal_added(ArrayList<String> old_functions,
+                                               ArrayList<Integer> old_function_values) {
+    for (int i = 0; i < functions.size(); i++) {
+      String func = functions.get(i);
+      char selected_node_char_value = func.charAt(func.length() - 1);
+      int selected_node_value = Character.getNumericValue(selected_node_char_value);
+      String old_func_version = func.substring(0, func.length() - 1);
+      int old_func_index = old_functions.indexOf(old_func_version);
+      int old_func_value = old_function_values.get(old_func_index);
+      if (selected_node_value == 0) {
+        function_values.set(i, old_func_value);
+      } else {
+        boolean val_bool = generator.nextDouble() < p;
+        int val = val_bool ? 1 : 0;
+        function_values.set(i, val);
+      }
+    }
+  }
+  
+  void regulatory_additive_mutation() {
     int my_network_size = my_network.size();
     Node selected_node = this;
-    println(selected_node);
     while (selected_node.equals(this)) {
       int selected_node_index = getRandomNumber(generator, 0, my_network_size);
       selected_node = my_network.get_node(selected_node_index);
     }
-    Signal selected_signal = new Signal(selected_node, this);
-    println(selected_node);
-    println(input_signals);
-    println(input_signals_quantities);
-    if (input_signals.contains(selected_signal)) { //<>//
-      int input_index = input_signals.indexOf(selected_signal);
-      my_network.connect(selected_node, this);
-      for (int i = 0; i < functions.size(); i++) {
-        String func = functions.get(i);
-        char selected_node_char_value = func.charAt(input_index);
-        int selected_node_value = Character.getNumericValue(selected_node_char_value);
-        if (selected_node_value == 1) {
-          boolean val_bool = generator.nextDouble() < p;
-          int val = val_bool ? 1 : 0;
-          function_values.set(i, val);
-        }
-      }
-    } else {
-      my_network.connect(selected_node, this);
-      ArrayList<String> old_functions = (ArrayList) functions.clone();
-      ArrayList<Integer> old_function_values = (ArrayList) function_values.clone();
-      for (int i = 0; i < functions.size(); i++) {
-        String func = functions.get(i);
-        char selected_node_char_value = func.charAt(func.length() - 1);
-        int selected_node_value = Character.getNumericValue(selected_node_char_value);
-        String old_func_version = func.substring(0, func.length() - 1);
-        int old_func_index = old_functions.indexOf(old_func_version);
-        int old_func_value = old_function_values.get(old_func_index);
-        if (selected_node_value == 0) {
-          function_values.set(i, old_func_value);
-        } else {
-          boolean val_bool = generator.nextDouble() < p;
-          int val = val_bool ? 1 : 0;
-          function_values.set(i, val);
-        }
-      }
-    }
-    println(input_signals);
-    println(input_signals_quantities);
+    my_network.connect(selected_node, this);
   }
   
-  void removal_mutation() {
+  void regulatory_subtractive_mutation() {
     int input_signals_size = input_signals.size();
-    println(input_signals);
-    println(input_signals_quantities);
-    println(functions);
-    println(function_values);
     int selected_signal_index = getRandomNumber(generator, 0, input_signals_size);
-    println(selected_signal_index);
     Signal selected_signal = input_signals.get(selected_signal_index);
-    println(selected_signal);
-    int selected_signal_quantity = input_signals_quantities.get(selected_signal_index);
-    
-    Node source_node = selected_signal.get_source(); //<>//
-    
-    if (selected_signal_quantity > 1) {
-      my_network.disconnect(source_node, this);
-      println(input_signals);
-      println(input_signals_quantities);
-      for (int i = 0; i < functions.size(); i++) {
-        String func = functions.get(i);
-        char selected_node_char_value = func.charAt(selected_signal_index);
-        int selected_node_value = Character.getNumericValue(selected_node_char_value);
-        if (selected_node_value == 1) {
-          boolean val_bool = generator.nextDouble() < p;
-          int val = val_bool ? 1 : 0;
-          function_values.set(i, val);
-        }
-      }
-    } else if (selected_signal_quantity == 1 && input_signals.size() > 1) {
-      ArrayList<String> old_functions = (ArrayList) functions.clone();
-      ArrayList<Integer> old_function_values = (ArrayList) function_values.clone();
-      println(input_signals);
-      println(input_signals_quantities);
-      println(functions);
-      println(function_values);
-      my_network.disconnect(source_node, this);
-      println(input_signals);
-      println(input_signals_quantities);
-      println(functions);
-      println(function_values);
-      for (int i = 0; i < old_functions.size(); i++) {
-        String old_func = old_functions.get(i);
-        int old_func_value = old_function_values.get(i);
-        char selected_node_char_value = old_func.charAt(selected_signal_index);
-        int selected_node_value = Character.getNumericValue(selected_node_char_value);
-        if (selected_node_value == 0) {
-          String new_func_version_part_1 = old_func.substring(0, selected_signal_index);
-          String new_func_version_part_2 = old_func.substring(selected_signal_index + 1);
-          String new_func_version = new_func_version_part_1 + new_func_version_part_2;
-          println(functions);
-          println(new_func_version);
-          int new_func_index = functions.indexOf(new_func_version);
-          function_values.set(new_func_index, old_func_value);
-        }
-      }
-    println(old_functions);
-    println(old_function_values);
-    }
-    println(input_signals);
-    println(input_signals_quantities);
-    println(functions);
-    println(function_values);
-
+    Node source_node = selected_signal.get_source();
+    my_network.disconnect(source_node, this);
   }
   
-  void regulatory_mutation(float u) {
-    Double prob = generator.nextDouble();
-    if (prob < (1 - u)) {
-      return;
-    } else if (prob < (1 -  (u / 2))) {
-      additive_mutation();
-    } else {
-      removal_mutation();
+  ArrayList<Node> find_network_targets(int num_affected_targets) {
+    int my_network_size = my_network.size();
+    ArrayList<Node> targets = new ArrayList<Node>();
+    ArrayList<Node> already_selected = new ArrayList<Node>();
+    already_selected.add(this);
+    while (targets.size() < num_affected_targets) {
+      int selected_node_index = getRandomNumber(generator, 0, my_network_size);
+      Node selected_node = my_network.get_node(selected_node_index);
+      while (already_selected.contains(selected_node)) {
+        selected_node_index = getRandomNumber(generator, 0, my_network_size);
+        selected_node = my_network.get_node(selected_node_index);
+      }
+      targets.add(selected_node);
+      already_selected.add(selected_node);
+    }
+    return targets;
+  }
+  
+  ArrayList<Node> find_output_targets(int num_affected_targets) {
+    int output_size = output_signals.size();
+    ArrayList<Node> targets = new ArrayList<Node>();
+    ArrayList<Node> already_selected = new ArrayList<Node>();
+    while (targets.size() < num_affected_targets) {
+      int selected_node_index = getRandomNumber(generator, 0, output_size);
+      Signal selected_signal = output_signals.get(selected_node_index);
+      Node selected_node = selected_signal.get_target();
+      while (already_selected.contains(selected_node)) {
+        selected_node_index = getRandomNumber(generator, 0, output_size);
+        selected_signal = output_signals.get(selected_node_index);
+        selected_node = selected_signal.get_target();
+      }
+      targets.add(selected_node);
+      already_selected.add(selected_node);
+    }
+    return targets;
+  }
+  
+  void coding_additive_mutation(int num_affected_targets) {
+    ArrayList<Node> targets = find_network_targets(num_affected_targets);
+    for (int i = 0; i < num_affected_targets; i++) {
+      Node target = targets.get(i);
+      my_network.connect(this, target);
     }
   }
+  
+  void coding_subtractive_mutation(int num_affected_targets) {
+    ArrayList<Node> targets = find_output_targets(num_affected_targets);
+    for (int i = 0; i < num_affected_targets; i++) {
+      Node target = targets.get(i);
+      my_network.disconnect(this, target); //<>//
+    }
+  }
+  
   
    @Override
    public String toString() {

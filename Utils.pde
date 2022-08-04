@@ -51,7 +51,7 @@ ArrayList<String> generate_binary_strings(int k, int max_num, Random generator) 
   
 //  for (int i=0; i < max_num; i++) {
     
-//    int current_num = getRandomNumber(0, num_strings_int); //<>//
+//    int current_num = getRandomNumber(0, num_strings_int); //<>// //<>// //<>//
 //    while (already_rand_nums.contains(current_num)) {
 //      current_num = getRandomNumber(0, num_strings_int);
 //    }

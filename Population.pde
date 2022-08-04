@@ -21,22 +21,42 @@ class Population {
     }
   }
   
-  //void mutate_population() {
-  //  for (Network network : population) {
-  //    ArrayList<Node> nodes = network.get_nodes();
-  //    for (Node node : nodes) {
-  //      LinkedHashSet<Signal> output_signals = node.get_output_signals();
-  //      Iterator<Signal> it = output_signals.iterator();
-  //      while (it.hasNext()) {
-  //        Signal current_signal = it.next();
-  //        Node target = current_signal.get_target();
-  //        target.regulatory_mutation(u);
-          
-  //      }
-  //    }
-  //  }
-  //}
-  
+  void mutate_population() {
+    for (Network network : population) {
+      
+      ArrayList<Node> nodes = network.get_nodes();
+      
+      for (Node node : nodes) {
+        
+        // Regulatory Mutation
+        int num_regulators = node.num_regulators();
+        for (int i = 0; i < num_regulators; i++) {
+          Double prob = generator.nextDouble();
+          if (prob < (1 - u)) {
+            continue;
+          } else if (prob < (1 -  (u / 2))) {
+            node.regulatory_additive_mutation();
+          } else {
+            node.regulatory_subtractive_mutation();
+          }
+        }
+        
+        // Coding Mutation
+        double num_outputs = (double) node.num_output_connections();
+        double b = generator.nextDouble();
+        double lb = num_outputs * b;
+        int num_affected_targets = round((float) lb);
+        Double prob = generator.nextDouble();
+        if (prob < (1 - u)) {
+          continue;
+        } else if (prob < (1 -  (u / 2))) {
+          node.coding_additive_mutation(num_affected_targets);
+        } else {
+          node.coding_subtractive_mutation(num_affected_targets);
+        }
+      }
+    }
+  }
   
   int get_num_networks() {
     return population.size();
