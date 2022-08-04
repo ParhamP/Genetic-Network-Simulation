@@ -5,7 +5,7 @@ import java.lang.Math;
 Network network;
 float time = 0;
 float time_increment = 1;
-int k_n = 3;
+int k_n = 4;
 float p = 0.5;
 int k_max = 6; // orig 12
 int n_max = 50; // orig 100
@@ -60,7 +60,7 @@ void draw() {
     
     
     network = new Network(total, p, k_max, n_max, generator);
-    network.create_connections(k_n);
+    network.create_connections(6);
     
     //Node first_node = network.get_node(3);
     //Node second_node = network.get_node(4);
