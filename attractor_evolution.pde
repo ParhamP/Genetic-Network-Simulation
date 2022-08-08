@@ -54,13 +54,13 @@ void setup() {
 void draw() {
   
   if (time == 0) {
-    total = 50;
+    total = 60;
     seed = 2;
     generator = new Random(seed);
     
     
     network = new Network(total, p, k_max, n_max, generator);
-    network.create_connections(6);
+    network.create_connections(4);
     
     //Node first_node = network.get_node(3);
     //Node second_node = network.get_node(4);
@@ -84,9 +84,22 @@ void draw() {
     
     Population pop = new Population(k_max, n_max);
     
-    pop.initialize_networks(1000, 10, 0.5, 4);
+    pop.initialize_networks(500, 10, 0.5, 3);
     
-    pop.mutate_population();
+    //pop.get_all_networks_attractors();
+    //for (int i = 0; i < pop.size(); i++) {
+    //  ArrayList<ArrayList<String>> current_attractor = pop.all_networks_attractors.get(i);
+    //      int current_attractor_size = current_attractor.size();
+    //      println(current_attractor_size);
+    //      if (current_attractor_size == 7) {
+    //        println(i);
+    //        println(current_attractor);
+    //      }
+    //}
+    pop.evolve();
+    //println(random_attractor);
+    
+    //pop.mutate_population();
     
 }
   
@@ -134,7 +147,7 @@ void draw() {
   //println("hello");
   network.update_state();
   //println(network_state);
-  println(time);
+  //println(time);
 
   }
   time = time + time_increment;
