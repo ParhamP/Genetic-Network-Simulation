@@ -1,42 +1,62 @@
-static void printTheArray(int arr[])
-{
-    int n = arr.length;
-    for (int i = 0; i < n; i++)
-    {
-        System.out.print(arr[i]+" ");
-    }
-    System.out.println();
-}
+//static void printTheArray(int arr[])
+//{
+//    int n = arr.length;
+//    for (int i = 0; i < n; i++)
+//    {
+//        System.out.print(arr[i]+" ");
+//    }
+//    System.out.println();
+//}
 
-ArrayList<String> generate_binary_strings(int k) {
-  ArrayList<String> results = new ArrayList<>();
-  double num_strings = Math.pow(2, k);
-  int num_strings_int = (int) num_strings;
-  for (int i=0; i < num_strings_int; i++) {
-    String format_string = "%" + String.valueOf(k) + "s";
-    String current_binary = String.format(format_string, Integer.toBinaryString(i)).replace(' ', '0');
-    results.add(current_binary);
-  }
-  return results;
-}
+//ArrayList<String> generate_binary_strings(int k) {
+//  ArrayList<String> results = new ArrayList<>();
+//  double num_strings = Math.pow(2, k);
+//  int num_strings_int = (int) num_strings;
+//  for (int i=0; i < num_strings_int; i++) {
+//    String format_string = "%" + String.valueOf(k) + "s";
+//    String current_binary = String.format(format_string, Integer.toBinaryString(i)).replace(' ', '0');
+//    results.add(current_binary);
+//  }
+//  return results;
+//}
 
 
-ArrayList<String> generate_binary_strings(int k, int max_num, Random generator) {
-  ArrayList<String> results = new ArrayList<>();
-  double num_strings = Math.pow(2, k);
-  int num_strings_int = (int) num_strings;
-  //ArrayList<Integer> already_rand_nums = new ArrayList<Integer>();
+//ArrayList<String> generate_binary_strings(int k, int max_num, Random generator) {
+//  ArrayList<String> results = new ArrayList<>();
+//  double num_strings = Math.pow(2, k);
+//  int num_strings_int = (int) num_strings;
+//  //ArrayList<Integer> already_rand_nums = new ArrayList<Integer>();
   
   
+//  for (int i=0; i < max_num; i++) {
+//    int current_num = getRandomNumber(generator, 0, num_strings_int);
+//    //println(current_num);
+//    //while (already_rand_nums.contains(current_num)) {
+//    //  current_num = getRandomNumber(0, num_strings_int);
+//    //}
+//    //already_rand_nums.add(current_num);
+//    String format_string = "%" + String.valueOf(k) + "s";
+//    String current_binary = String.format(format_string, Integer.toBinaryString(current_num)).replace(' ', '0');
+//    results.add(current_binary);
+//  }
+//  return results;
+//}
+
+ArrayList<ArrayList<Integer>> generate_random_binary_numbers(int k, int max_num, Random generator) {
+  ArrayList<ArrayList<Integer>> results = new ArrayList<ArrayList<Integer>>();
+  double num_strings = Math.pow(2, k);
+  int num_strings_int = (int) num_strings;
   for (int i=0; i < max_num; i++) {
     int current_num = getRandomNumber(generator, 0, num_strings_int);
-    //println(current_num);
-    //while (already_rand_nums.contains(current_num)) {
-    //  current_num = getRandomNumber(0, num_strings_int);
-    //}
-    //already_rand_nums.add(current_num);
-    String format_string = "%" + String.valueOf(k) + "s";
-    String current_binary = String.format(format_string, Integer.toBinaryString(current_num)).replace(' ', '0');
+    //int[] current_binary = new int[k];
+    ArrayList<Integer> current_binary = new ArrayList<Integer>();
+    for (int j = 0; j < k; j++) {
+      current_binary.add(0);
+    }
+    for (int pos = k - 1 ; pos != -1; pos--) {
+        int m = (current_num & (1 << pos)) != 0 ? 1 : 0;
+        current_binary.set((k - 1) - pos, m);
+    }
     results.add(current_binary);
   }
   return results;
@@ -51,7 +71,7 @@ ArrayList<String> generate_binary_strings(int k, int max_num, Random generator) 
   
 //  for (int i=0; i < max_num; i++) {
     
-//    int current_num = getRandomNumber(0, num_strings_int); //<>//
+//    int current_num = getRandomNumber(0, num_strings_int);
 //    while (already_rand_nums.contains(current_num)) {
 //      current_num = getRandomNumber(0, num_strings_int);
 //    }
@@ -77,8 +97,8 @@ public int[][] generate_binary_matrix(int b) {
   int[][] r = new int[(int)Math.pow(2,b)][b];
   int i = 1;
   while (i < r.length) {
-    for (int pos = 0 ; pos != b ; pos++) {
-        r[i][pos] = (i & (1 << pos)) != 0 ? 1 : 0;
+    for (int pos = b - 1 ; pos != -1 ; pos--) {
+        r[i][(b - 1) - pos] = (i & (1 << pos)) != 0 ? 1 : 0;
     }
      i += 1;
    }

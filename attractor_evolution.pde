@@ -15,8 +15,8 @@ int attractor_count = 0;
 int total;
 int seed;
 Random generator;
-ArrayList<String> S;
-ArrayList<ArrayList<String>> attractors;
+ArrayList<ArrayList<Integer>> S;
+ArrayList<ArrayList<ArrayList<Integer>>> attractors;
 
 
 
@@ -55,18 +55,35 @@ void setup() {
 void draw() {
   
   if (time == 0) {
-    total = 60;
-    seed = 2;
+    total = 75;
+    seed = 5;
     generator = new Random(seed);
     
+    //int[][] x = generate_binary_matrix(5);
+    //generate_binary_matrix(4);
+    //ArrayList<int[]> x = generate_random_binary_numbers(100, 100000, generator);
+    //println(x.get(2));
     
+    
+    //println(x.get(99999));
     network = new Network(total, p, k_max, n_max, generator);
     network.create_connections(k_n);
+    
+    S = generate_random_binary_numbers(total, 100000, generator);
+    
+    //println(S.get(2));
+    println(S.size());
+  
+    attractors = network.get_attractors(S);
+    
+    //println(attractors);
+    println(attractors.size());
     
     
     //int[][] x = generate_binary_matrix(10);
     //println(x.length);
     //System.out.println(Arrays.deepToString(x));
+    //
     
     //    System.out.println(Arrays.deepToString(functions));
     //println(function_values);  
@@ -82,18 +99,12 @@ void draw() {
     //first_node.removal_mutation();
     //first_node.regulatory_mutation(0.99);
     
-    //S = generate_binary_strings(total, (int) 1000, generator);
-    
-    //println(S.size());
-  
-    //attractors = network.get_attractors(S);
-    //println(attractors.size());
-    //println(attractors);
+
     
     
-    Population pop = new Population(k_max, n_max);
+    //Population pop = new Population(k_max, n_max);
     
-    pop.initialize_networks(500, 10, 0.5, 3);
+    //pop.initialize_networks(500, 15, 0.5, 3);
     
     //pop.get_all_networks_attractors();
     //for (int i = 0; i < pop.size(); i++) {
@@ -105,7 +116,7 @@ void draw() {
     //        println(current_attractor);
     //      }
     //}
-    pop.evolve();
+    //pop.evolve();
     //println(random_attractor);
     
     //pop.mutate_population();
@@ -326,6 +337,7 @@ void draw() {
 void mousePressed() {
   //time = time + time_increment;
   //ArrayList<String> x = generate_binary_strings(total, 1, generator);
-  //String my_state = x.get(0);
-  //network.set_node_values(my_state);
+  ArrayList<ArrayList<Integer>> x = generate_random_binary_numbers(total, 1, generator);
+  ArrayList<Integer> my_state = x.get(0);
+  network.set_node_values(my_state);
 }

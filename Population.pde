@@ -5,8 +5,8 @@ class Population {
   int seed;
   float u;
   int k_max;
-  ArrayList<ArrayList<ArrayList<String>>> all_networks_attractors;
-  ArrayList<String> S;
+  ArrayList<ArrayList<ArrayList<ArrayList<Integer>>>> all_networks_attractors;
+  ArrayList<ArrayList<Integer>> S;
   int min_allowed_num_networks;
   
   Population(int max_num_inputs, int max_num_nodes) {
@@ -78,14 +78,14 @@ class Population {
   
   void generate_subsets() {
     int example_network_size = current_network_size();
-    S = generate_binary_strings(example_network_size, 1000, generator);
+    S =  generate_random_binary_numbers(example_network_size, 1000, generator);
   }
   
-  ArrayList<ArrayList<ArrayList<String>>> get_all_networks_attractors() {
-    all_networks_attractors = new ArrayList<ArrayList<ArrayList<String>>>();
+  ArrayList<ArrayList<ArrayList<ArrayList<Integer>>>> get_all_networks_attractors() {
+    all_networks_attractors = new ArrayList<ArrayList<ArrayList<ArrayList<Integer>>>>();
     for (int i = 0; i < population.size(); i++) {
       Network network = population.get(i);
-      ArrayList<ArrayList<String>> current_network_attractors = network.get_attractors(S);
+      ArrayList<ArrayList<ArrayList<Integer>>> current_network_attractors = network.get_attractors(S);
       all_networks_attractors.add(current_network_attractors);
     }
     return all_networks_attractors;
@@ -95,17 +95,17 @@ class Population {
     generate_subsets();
     int num_generations_max = 10;
     for (int g_i = 0; g_i < num_generations_max; g_i++) {
-      ArrayList<ArrayList<ArrayList<String>>> pre_attractors = get_all_networks_attractors();
+      ArrayList<ArrayList<ArrayList<ArrayList<Integer>>>> pre_attractors = get_all_networks_attractors();
       mutate_population();
-      ArrayList<ArrayList<ArrayList<String>>> post_attractors = get_all_networks_attractors();
+      ArrayList<ArrayList<ArrayList<ArrayList<Integer>>>> post_attractors = get_all_networks_attractors();
       ArrayList<Integer> acc_violators = new ArrayList<Integer>();
       //println(pre_attractors.equals(post_attractors));
       //println(pre_attractors.size());
       int count = 0;
       for (int i = 0; i < pre_attractors.size(); i++) {
-        ArrayList<ArrayList<String>> current_pre_attractors = pre_attractors.get(i);
-        ArrayList<ArrayList<String>> current_post_attractors = post_attractors.get(i);
-        if (!current_pre_attractors.equals(current_post_attractors)) {
+        ArrayList<ArrayList<ArrayList<Integer>>> current_pre_attractors = pre_attractors.get(i);
+        ArrayList<ArrayList<ArrayList<Integer>>> current_post_attractors = post_attractors.get(i);
+        if (!current_pre_attractors.equals(current_post_attractors)) { // check this
           count = count + 1;
           acc_violators.add(i);
         }

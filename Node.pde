@@ -7,7 +7,6 @@ class Node {
   ArrayList<Integer> output_signals_quantities;
   float p; // bias
   int k_max; // max num of input signals
-  //ArrayList<String> functions;
   int[][] functions;
   ArrayList<Integer> function_values;
   //int seed = 0;
@@ -155,10 +154,9 @@ class Node {
   }
   
   
-  void generate_functions() { // whenever a new input node is added to me, I need to generate functions again
+  void generate_functions() {
     int k = input_signals.size();
     functions = generate_binary_matrix(k);
-    //functions = generate_binary_strings(k);
     function_values = new ArrayList<Integer>();
     for (int i = 0; i < functions.length; i++) {
       int val = generate_random_binary_with_prob(generator, p);
@@ -166,8 +164,7 @@ class Node {
     }
   }
   
-  void generate_functions(int[][] funcs) { // whenever a new input node is added to me, I need to generate functions again
-    //int k = input_signals.size();
+  void generate_functions(int[][] funcs) {
     this.functions = funcs;
     function_values = new ArrayList<Integer>();
     for (int i = 0; i < functions.length; i++) {
@@ -175,26 +172,6 @@ class Node {
       function_values.add(val);
     }
   }
-  
-  //int calculate_value() throws Exception{
-  //  String val_string = "";
-  //  Iterator<Signal> it = input_signals.iterator();
-  //  while (it.hasNext()) {
-  //    Signal current_signal = it.next();
-  //    int current_input_val = current_signal.get_source_value();
-  //    val_string = val_string + String.valueOf(current_input_val);
-  //  }
-  //  int functions_length = functions.size();
-  //  for (int i = 0; i < functions_length; i++) {
-  //    String current_function = functions.get(i);
-  //    if (val_string.equals(current_function)) {
-  //      int current_function_val = function_values.get(i);
-  //      this.value = current_function_val;
-  //      return current_function_val;
-  //    }
-  //  }
-  //  throw new Exception("Couldn't find the correct function.");
-  //}
   
   int calculate_value() {
     int num_inputs = num_regulators();
@@ -212,10 +189,7 @@ class Node {
   
   void update_functions_after_duplicate_signal_added(int input_index) {
     for (int i = 0; i < functions.length; i++) {
-      //String func = functions.get(i);
       int[] func = functions[i];
-      //char selected_node_char_value = func.charAt(input_index);
-      //int selected_node_value = Character.getNumericValue(selected_node_char_value);
       int selected_node_value = func[input_index];
       if (selected_node_value == 1) {
         int val = generate_random_binary_with_prob(generator, p);
@@ -226,10 +200,7 @@ class Node {
   
   void update_functions_after_duplicate_signal_removed(int selected_signal_index) {
     for (int i = 0; i < functions.length; i++) {
-      //String func = functions.get(i);
       int[] func = functions[i];
-      //char selected_node_char_value = func.charAt(selected_signal_index);
-      //int selected_node_value = Character.getNumericValue(selected_node_char_value);
       int selected_node_value = func[selected_signal_index];
       if (selected_node_value == 1) {
         int val = generate_random_binary_with_prob(generator, p);
@@ -244,17 +215,11 @@ class Node {
     for (int i = 0; i < old_functions.length; i++) {
       int[] old_func = old_functions[i];
       int old_func_value = old_function_values.get(i);
-      //char selected_node_char_value = old_func.charAt(selected_signal_index);
-      //int selected_node_value = Character.getNumericValue(selected_node_char_value);
       int selected_node_value = old_func[selected_signal_index];
       if (selected_node_value == 0) {
-        //String new_func_version_part_1 = old_func.substring(0, selected_signal_index);
         int[] new_func_version_part_1 = Arrays.copyOfRange(old_func, 0, selected_signal_index);
-        //String new_func_version_part_2 = old_func.substring(selected_signal_index + 1);
         int[] new_func_version_part_2 = Arrays.copyOfRange(old_func, selected_signal_index + 1, old_func.length);
-        //String new_func_version = new_func_version_part_1 + new_func_version_part_2;
         int[] new_func_version = concatWithArrayCopy(new_func_version_part_1, new_func_version_part_2);
-        //int new_func_index = functions.indexOf(new_func_version);
         int new_func_index = matrix_index_of_array(functions, new_func_version);
         function_values.set(new_func_index, old_func_value);
       }
@@ -265,13 +230,9 @@ class Node {
                                                ArrayList<Integer> old_function_values) {                                       
     for (int i = 0; i < functions.length; i++) {
       int[] func = functions[i];
-      //char selected_node_char_value = func.charAt(func.length() - 1);
-      //int selected_node_value = Character.getNumericValue(selected_node_char_value);
       int selected_node_value = func[func.length - 1];
       if (selected_node_value == 0) {
-        //String old_func_version = func.substring(0, func.length() - 1);
         int[] old_func_version = Arrays.copyOfRange(func, 0, func.length - 1);
-        //int old_func_index = old_functions.indexOf(old_func_version);
         int old_func_index = matrix_index_of_array(old_functions, old_func_version);
         int old_func_value = old_function_values.get(old_func_index);
         function_values.set(i, old_func_value);

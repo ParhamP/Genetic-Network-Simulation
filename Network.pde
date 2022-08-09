@@ -7,11 +7,10 @@ class Network {
   ArrayList<Node> nodes;
   int k;
   float r = 700;
-  HashMap<String, Integer> state_attractor_numbers;
-  //HashMap<Integer, ArrayList<String>> binary_functions_archive;
+  HashMap<ArrayList<Integer>, Integer> state_attractor_numbers;
   HashMap<Integer, int[][]> binary_functions_archive;
   Random generator;
-  ArrayList<ArrayList<String>> attractors;
+  ArrayList<ArrayList<ArrayList<Integer>>> attractors;
   
   Network() {
   }
@@ -25,7 +24,7 @@ class Network {
       n_max = max_num_nodes;
       nodes = create_sphere();
       binary_functions_archive = new HashMap<Integer, int[][]>();
-      state_attractor_numbers = new HashMap<String, Integer>();
+      state_attractor_numbers = new HashMap<ArrayList<Integer>, Integer>();
   }
   
   ArrayList<Node> get_nodes() {
@@ -96,11 +95,9 @@ class Network {
   void create_connections(int k_n) {
     ArrayList<Node> globe = nodes;
     if (!binary_functions_archive.containsKey(k_n)) {
-      //ArrayList<String> function_strings = generate_binary_strings(k_n);
       int[][] function_matrix = generate_binary_matrix(k_n);
       binary_functions_archive.put(k_n, function_matrix);
     }
-    //ArrayList<String> functions = binary_functions_archive.get(k_n);
     int[][] functions = binary_functions_archive.get(k_n);
     int total = globe.size();
     for (int i = 0; i < total; i++) {
@@ -132,37 +129,34 @@ class Network {
     k = k_n;
   }
   
-  String update_state() {
+  ArrayList<Integer> update_state() {
     ArrayList<Node> globe = nodes;
     int total = globe.size();
     //int[] results = new int[total];
-    String results = "";
+    ArrayList<Integer> results = new ArrayList<Integer>();
     for (int i = 0; i < total; i++) {
       Node n1 = globe.get(i);
-      //int current_value = n1.get_value();
         try {
           n1.calculate_value();
         } catch(Exception e) {
           println(e);
         }
         int current_value = n1.get_value();
-        results = results + String.valueOf(current_value);
+        results.add(current_value);
       }
       return results;
     }
     
-  String update_state(String state) {
+  ArrayList<Integer> update_state(ArrayList<Integer> state) {
     set_node_values(state);
     return update_state();
   }
     
-  void set_node_values(String state) {
+  void set_node_values(ArrayList<Integer> state) {
     ArrayList<Node> globe = nodes;
     int total = globe.size();
-    char[] state_chars = state.toCharArray();
     for (int i = 0; i < total; i++) {
-      char current_state_val_char = state_chars[i];
-      int current_state_val = Character.getNumericValue(current_state_val_char);
+      int current_state_val = state.get(i);
       Node n1 = globe.get(i);
       n1.set_value(current_state_val);
     }
@@ -177,40 +171,42 @@ class Network {
     return nodes.size();
   }
   
-  String get_network_state() {
+  ArrayList<Integer> get_network_state() {
     ArrayList<Node> globe = nodes;
     int total = globe.size();
     //int[] results = new int[total];
-    String results = "";
+    ArrayList<Integer> results = new ArrayList<Integer>();
+    //String results = "";
     for (int i = 0; i < total; i++) {
       Node n1 = globe.get(i);
       int current_value = n1.get_value();
-      results = results + String.valueOf(current_value);
+      results.add(current_value);
+      //results = results + String.valueOf(current_value);
       }
     return results;
   }
   
-  void set_state_attractor(String state_string, int attractor_num) {
-    state_attractor_numbers.put(state_string, attractor_num);
+  void set_state_attractor(ArrayList<Integer> state, int attractor_num) {
+    state_attractor_numbers.put(state, attractor_num);
   }
   
-  Integer get_state_attractor(String state_string) {
-    if (state_attractor_numbers.containsKey(state_string)) {
-      Integer attractor_num = state_attractor_numbers.get(state_string);
+  Integer get_state_attractor(ArrayList<Integer> state) {
+    if (state_attractor_numbers.containsKey(state)) {
+      Integer attractor_num = state_attractor_numbers.get(state);
       return attractor_num;
     } else {
       return 0;
     }
   }
   
-  ArrayList<ArrayList<String>> get_attractors(ArrayList<String> S) { // S -> start states
-    String orig_state = get_network_state();
+  ArrayList<ArrayList<ArrayList<Integer>>> get_attractors(ArrayList<ArrayList<Integer>> S) {
+    ArrayList<Integer> orig_state = get_network_state();
     int currentAttractor = 0;
-    ArrayList<ArrayList<String>> resultList = new ArrayList<ArrayList<String>>();
-    state_attractor_numbers = new HashMap<String, Integer>();
-    for(String startState : S) {
+    ArrayList<ArrayList<ArrayList<Integer>>> resultList = new ArrayList<ArrayList<ArrayList<Integer>>>();
+    state_attractor_numbers = new HashMap<ArrayList<Integer>, Integer>();
+    for(ArrayList<Integer> startState : S) {
       if (get_state_attractor(startState) == 0) {
-        String current = startState;
+        ArrayList<Integer> current = startState;
         currentAttractor = currentAttractor + 1;
         while (get_state_attractor(current) == 0) {
           set_state_attractor(current, currentAttractor);
@@ -218,15 +214,15 @@ class Network {
         }
         int current_state_attractor = get_state_attractor(current);
         if (current_state_attractor == currentAttractor) {
-          String attractorStart = current;
-          ArrayList<String> attractor = new ArrayList<String>();
+          ArrayList<Integer> attractorStart = current;
+          ArrayList<ArrayList<Integer>> attractor = new ArrayList<ArrayList<Integer>>();
           do {
             attractor.add(current);
             current = update_state(current);
           } while (!current.equals(attractorStart));
           resultList.add(attractor);
         } else {
-          String attractorStart = current;
+          ArrayList<Integer> attractorStart = current;
           Integer attractorStartNum = get_state_attractor(attractorStart);
           current = startState;
           while (!current.equals(attractorStart)) {
@@ -242,30 +238,19 @@ class Network {
   }
   
   boolean is_in_attractor_state() {
-  String state = get_network_state();
-  if (attractors == null || attractors.isEmpty()) {
-    return false;
-  }
-  for (ArrayList<String> s_a : attractors) {
-    for (String s : s_a) {
-      if (s.equals(state)) {
-        //println("yes");
-        return true;
+    ArrayList<Integer> state = get_network_state();
+    if (attractors == null || attractors.isEmpty()) {
+      return false;
+    }
+    for (ArrayList<ArrayList<Integer>> s_a : attractors) {
+      for (ArrayList<Integer> s : s_a) {
+        if (s.equals(state)) {
+          return true;
+        }
       }
     }
-  }
-  //println("no");
   return false;
 }
-  
-
-  
-  
-  
-  
-  
-  
-  
   
   
   
