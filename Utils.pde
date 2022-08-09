@@ -71,3 +71,42 @@ public int getRandomNumber(Random generator, int min, int max) {
   Integer random = generator.nextInt(min, max);
   return random;
 }
+
+
+public int[][] generate_binary_matrix(int b) {
+  int[][] r = new int[(int)Math.pow(2,b)][b];
+  int i = 1;
+  while (i < r.length) {
+    for (int pos = 0 ; pos != b ; pos++) {
+        r[i][pos] = (i & (1 << pos)) != 0 ? 1 : 0;
+    }
+     i += 1;
+   }
+   return r;
+ }
+
+
+public int matrix_index_of_array(int[][] matrix, int[] item) {
+  for (int i = 0; i < matrix.length; i++) {
+    int[] current_item = matrix[i];
+    if (Arrays.equals(current_item, item)) {
+      return i;
+    }
+  }
+  println("couldn't match function");
+  return -1;
+}
+
+
+public int generate_random_binary_with_prob(Random generator, double prob) {
+  boolean val_bool = generator.nextDouble() < prob;
+  int value = val_bool ? 1 : 0;
+  return value;
+}
+
+
+public int[] concatWithArrayCopy(int[] array1, int[] array2) {
+    int[] result = Arrays.copyOf(array1, array1.length + array2.length);
+    System.arraycopy(array2, 0, result, array1.length, array2.length);
+    return result;
+}

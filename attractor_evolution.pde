@@ -2,6 +2,7 @@ import peasy.*;
 PeasyCam cam;
 import java.util.*;
 import java.lang.Math;
+import java.util.Arrays;
 Network network;
 float time = 0;
 float time_increment = 1;
@@ -60,7 +61,15 @@ void draw() {
     
     
     network = new Network(total, p, k_max, n_max, generator);
-    network.create_connections(4);
+    network.create_connections(k_n);
+    
+    
+    //int[][] x = generate_binary_matrix(10);
+    //println(x.length);
+    //System.out.println(Arrays.deepToString(x));
+    
+    //    System.out.println(Arrays.deepToString(functions));
+    //println(function_values);  
     
     //Node first_node = network.get_node(3);
     //Node second_node = network.get_node(4);

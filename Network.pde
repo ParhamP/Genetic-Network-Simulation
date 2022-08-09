@@ -8,7 +8,8 @@ class Network {
   int k;
   float r = 700;
   HashMap<String, Integer> state_attractor_numbers;
-  HashMap<Integer, ArrayList<String>> binary_functions_archive;
+  //HashMap<Integer, ArrayList<String>> binary_functions_archive;
+  HashMap<Integer, int[][]> binary_functions_archive;
   Random generator;
   ArrayList<ArrayList<String>> attractors;
   
@@ -23,7 +24,7 @@ class Network {
       k_max = max_num_inputs;
       n_max = max_num_nodes;
       nodes = create_sphere();
-      binary_functions_archive = new HashMap<Integer, ArrayList<String>>();
+      binary_functions_archive = new HashMap<Integer, int[][]>();
       state_attractor_numbers = new HashMap<String, Integer>();
   }
   
@@ -95,10 +96,12 @@ class Network {
   void create_connections(int k_n) {
     ArrayList<Node> globe = nodes;
     if (!binary_functions_archive.containsKey(k_n)) {
-      ArrayList<String> function_strings = generate_binary_strings(k_n);
-      binary_functions_archive.put(k_n, function_strings);
+      //ArrayList<String> function_strings = generate_binary_strings(k_n);
+      int[][] function_matrix = generate_binary_matrix(k_n);
+      binary_functions_archive.put(k_n, function_matrix);
     }
-    ArrayList<String> functions = binary_functions_archive.get(k_n);
+    //ArrayList<String> functions = binary_functions_archive.get(k_n);
+    int[][] functions = binary_functions_archive.get(k_n);
     int total = globe.size();
     for (int i = 0; i < total; i++) {
       Node n1 = globe.get(i);
