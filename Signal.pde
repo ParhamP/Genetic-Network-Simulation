@@ -2,16 +2,20 @@ class Signal {
   PVector location;
   Node source;
   Node target;
-  //int quantity;
   
-  Signal() {
+  Signal(Signal signal, Network current_network) {
+    Network old_network = signal.source.my_network;
+    int source_number = old_network.get_node_number(signal.source);
+    int target_number = old_network.get_node_number(signal.target);
+    this.source = current_network.get_node(source_number);
+    this.target = current_network.get_node(target_number);
   }
   
   Signal(Node source_node, Node target_node) {
     source = source_node;
     target = target_node;
-    //set_quantity(1);
   }
+  
   
   Node get_source() {
     return source;

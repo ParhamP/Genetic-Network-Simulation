@@ -8,17 +8,19 @@ class Population {
   ArrayList<ArrayList<ArrayList<ArrayList<Integer>>>> all_networks_attractors;
   ArrayList<ArrayList<Integer>> S;
   int min_allowed_num_networks;
+  int num_orig_networks;
   
   Population(int max_num_inputs, int max_num_nodes) {
     k_max = max_num_inputs;
     n_max = max_num_nodes;
     u = 0.01;
     seed = 1;
-    min_allowed_num_networks = 250;
     generator = new Random(seed);
   }
   
   void initialize_networks(int num_networks, int n, float p, int k_0) {
+    num_orig_networks = num_networks;
+    min_allowed_num_networks = num_orig_networks / 2;
     if (k_0 > k_max) {
       k_0 = k_max;
     }
@@ -85,7 +87,8 @@ class Population {
     all_networks_attractors = new ArrayList<ArrayList<ArrayList<ArrayList<Integer>>>>();
     for (int i = 0; i < population.size(); i++) {
       Network network = population.get(i);
-      ArrayList<ArrayList<ArrayList<Integer>>> current_network_attractors = network.get_attractors(S);
+      ArrayList<ArrayList<ArrayList<Integer>>> current_network_attractors =
+      network.get_attractors(S);
       all_networks_attractors.add(current_network_attractors);
     }
     return all_networks_attractors;
@@ -95,17 +98,27 @@ class Population {
     generate_subsets();
     int num_generations_max = 10;
     for (int g_i = 0; g_i < num_generations_max; g_i++) {
-      ArrayList<ArrayList<ArrayList<ArrayList<Integer>>>> pre_attractors = get_all_networks_attractors();
+      generate_subsets();
+      ArrayList<ArrayList<ArrayList<ArrayList<Integer>>>> pre_attractors =
+      get_all_networks_attractors();
       mutate_population();
-      ArrayList<ArrayList<ArrayList<ArrayList<Integer>>>> post_attractors = get_all_networks_attractors();
+      ArrayList<ArrayList<ArrayList<ArrayList<Integer>>>> post_attractors =
+      get_all_networks_attractors();
       ArrayList<Integer> acc_violators = new ArrayList<Integer>();
-      //println(pre_attractors.equals(post_attractors));
-      //println(pre_attractors.size());
       int count = 0;
-      for (int i = 0; i < pre_attractors.size(); i++) {
-        ArrayList<ArrayList<ArrayList<Integer>>> current_pre_attractors = pre_attractors.get(i);
-        ArrayList<ArrayList<ArrayList<Integer>>> current_post_attractors = post_attractors.get(i);
-        if (!current_pre_attractors.equals(current_post_attractors)) { // check this
+      for (int i = 0; i < pre_attractors.size(); i++) { // looping through networks
+        ArrayList<ArrayList<ArrayList<Integer>>> current_pre_attractors =
+        pre_attractors.get(i);
+        ArrayList<ArrayList<ArrayList<Integer>>> current_post_attractors =
+        post_attractors.get(i);
+        if (!current_pre_attractors.equals(current_post_attractors)) {
+          if (current_post_attractors.size() > current_pre_attractors.size()) {
+            println(current_pre_attractors); //<>// //<>//
+            println(current_post_attractors);
+            println(current_pre_attractors.size());
+            println(current_post_attractors.size());
+            println("----------");
+          }
           count = count + 1;
           acc_violators.add(i);
         }
@@ -115,15 +128,44 @@ class Population {
         population.remove(i);
       }
       
-      if (population.size() < min_allowed_num_networks) {
-        
-        println(population.size());
-      }
-      //println(count);
-      //println(population.size());
-      //for (ArrayList<ArrayList<String>> attractor : post_attractors) {
-      //  println(attractor.size());
+      //float total = post_attractors.size();
+      //float count_l = 0;
+      //for (ArrayList<ArrayList<ArrayList<Integer>>> network_attractors : post_attractors) {
+      //  //println(network_attractors.size());
+      //  count_l = count_l + network_attractors.size();
       //}
+      
+      //println(count_l / total);
+      
+      if (population.size() < min_allowed_num_networks) {
+        int population_size = population.size();
+        float C = 0;
+        float[] alphas = new float[population.size()];
+        for (int i = 0; i < population_size; i++) {
+          Network network = population.get(i);
+          float alpha_i = network.average_gene_expression_variability();
+          alphas[i] = alpha_i;
+          C = C + alpha_i;
+        }
+        C = 1 / C;
+        for (int i = 0; i < population_size; i++) {
+          Network network = population.get(i);
+          float alpha_i  = alphas[i];
+          float m_i_float = C * alpha_i * num_orig_networks;
+          int m_i = round(m_i_float);
+          for (int j = 0; j < m_i; j++) {
+            Network daughter_network = new Network(network);
+            population.add(daughter_network);
+          }
+        }
+      }
+      
+      
+      if (g_i % 2000 == 0) {
+        
+      
+      }
+      
     }
   }
   

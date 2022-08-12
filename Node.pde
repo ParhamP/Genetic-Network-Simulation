@@ -13,7 +13,34 @@ class Node {
   Random generator;
   Network my_network;
   
-  Node() {
+  Node(Node node, Network new_my_network) {
+    this.location = node.location.copy();
+    this.value = node.value;
+    this.my_network = new_my_network;
+    this.input_signals_quantities = DeepCopyArrayListInteger(node.input_signals_quantities);
+    this.output_signals_quantities = DeepCopyArrayListInteger(node.output_signals_quantities);
+    this.p = node.p;
+    this.k_max = node.k_max;
+    this.functions = DeepCopy2DArrayInt(node.functions);
+    this.function_values = DeepCopyArrayListInteger(node.function_values);
+    this.generator = node.generator;
+  }
+  
+  void copy_signals(Node node) {
+    ArrayList<Signal> new_input_signals = new ArrayList<Signal>();
+    ArrayList<Signal> new_output_signals = new ArrayList<Signal>();
+    for (int i = 0; i < node.input_signals.size(); i++) {
+      Signal old_signal = node.input_signals.get(i);
+      Signal new_signal = new Signal(old_signal, this.my_network);
+      new_input_signals.add(new_signal);
+    }
+    for (int i = 0; i < node.output_signals.size(); i++) {
+      Signal old_signal = node.output_signals.get(i);
+      Signal new_signal = new Signal(old_signal, this.my_network);
+      new_output_signals.add(new_signal);
+    }
+    this.input_signals = new_input_signals;
+    this.output_signals = new_output_signals;
   }
   
   Node(float x, float y, float z, float bias, int max_num_inputs) {
@@ -40,6 +67,22 @@ class Node {
     //value = -1; // indicates it hasn't been calculated yet
     generator = my_generator;
     value = generate_random_binary_with_prob(generator, 0.5);
+  }
+  
+  ArrayList<Integer> DeepCopyArrayListInteger(ArrayList<Integer> old){
+    ArrayList<Integer> copy = new ArrayList<Integer>(old.size());
+    for(Integer i : old){
+        copy.add(Integer.valueOf(i));
+    }
+    return copy;
+  }
+  
+  int[][] DeepCopy2DArrayInt(int[][] matrix) {
+    int [][] myInt = new int[matrix.length][];
+    for(int i = 0; i < matrix.length; i++) {
+      myInt[i] = matrix[i].clone();
+    }
+    return myInt;
   }
   
   void set_location(float x, float y, float z) {
@@ -101,8 +144,10 @@ class Node {
     Signal output_signal = new Signal(this, target_node);
     if (output_signals.contains(output_signal)) {
       int output_signal_index = output_signals.indexOf(output_signal);
-      int current_output_signal_quantity = output_signals_quantities.get(output_signal_index);
-      output_signals_quantities.set(output_signal_index, current_output_signal_quantity + 1);
+      int current_output_signal_quantity =
+      output_signals_quantities.get(output_signal_index);
+      output_signals_quantities.set(output_signal_index,
+      current_output_signal_quantity + 1);
     } else {
       output_signals.add(output_signal);
       output_signals_quantities.add(1);
@@ -217,9 +262,12 @@ class Node {
       int old_func_value = old_function_values.get(i);
       int selected_node_value = old_func[selected_signal_index];
       if (selected_node_value == 0) {
-        int[] new_func_version_part_1 = Arrays.copyOfRange(old_func, 0, selected_signal_index);
-        int[] new_func_version_part_2 = Arrays.copyOfRange(old_func, selected_signal_index + 1, old_func.length);
-        int[] new_func_version = concatWithArrayCopy(new_func_version_part_1, new_func_version_part_2);
+        int[] new_func_version_part_1 = Arrays.copyOfRange(old_func, 0,
+        selected_signal_index);
+        int[] new_func_version_part_2 = Arrays.copyOfRange(old_func,
+        selected_signal_index + 1, old_func.length);
+        int[] new_func_version = concatWithArrayCopy(new_func_version_part_1,
+        new_func_version_part_2);
         int new_func_index = matrix_index_of_array(functions, new_func_version);
         function_values.set(new_func_index, old_func_value);
       }

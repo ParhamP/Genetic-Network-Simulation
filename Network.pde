@@ -1,5 +1,4 @@
 class Network {
-  //float r;
   Integer total;
   float p;
   int k_max; // max num of input signals
@@ -25,6 +24,29 @@ class Network {
       nodes = create_sphere();
       binary_functions_archive = new HashMap<Integer, int[][]>();
       state_attractor_numbers = new HashMap<ArrayList<Integer>, Integer>();
+  }
+  
+  public Network(Network network) {
+    this.total = network.total;
+    this.p = network.p;
+    this.k_max = network.k_max;
+    this.n_max = network.n_max;
+    ArrayList<Node> new_nodes = new ArrayList<Node>();
+    for (Node node : network.nodes) {
+      Node new_node = new Node(node, this);
+      new_nodes.add(new_node);
+    }
+    this.nodes = new_nodes;
+    for (int i = 0; i < network.nodes.size(); i++) {
+      Node old_node = network.nodes.get(i);
+      Node new_node = this.nodes.get(i);
+      new_node.copy_signals(old_node);
+    }
+    this.r = network.r;
+    this.binary_functions_archive = network.binary_functions_archive;
+    this.generator = network.generator;
+    //this.state_attractor_numbers = network.state_attractor_numbers;
+    //this.attractors = network.attractors;
   }
   
   ArrayList<Node> get_nodes() {
@@ -132,7 +154,6 @@ class Network {
   ArrayList<Integer> update_state() {
     ArrayList<Node> globe = nodes;
     int total = globe.size();
-    //int[] results = new int[total];
     ArrayList<Integer> results = new ArrayList<Integer>();
     for (int i = 0; i < total; i++) {
       Node n1 = globe.get(i);
@@ -151,6 +172,7 @@ class Network {
     set_node_values(state);
     return update_state();
   }
+  
     
   void set_node_values(ArrayList<Integer> state) {
     ArrayList<Node> globe = nodes;
@@ -166,6 +188,38 @@ class Network {
     return 2 * p * (1 - p) * k;
   }
   
+  float average_gene_expression_variability() {
+    // gene expression variability
+    float total_alpha = 0;
+    float total_count = 0;
+    for (ArrayList<ArrayList<Integer>> attractor : attractors) {
+      for (ArrayList<Integer> state : attractor) {
+        float alpha = alpha_fitness(state);
+        total_alpha = total_alpha + alpha;
+        total_count = total_count + 1;
+      }
+    }
+    float res = total_alpha / total_count;
+    return res;
+  }
+  
+  float alpha_fitness(ArrayList<Integer> state) {
+    float num_zeros = 0;
+    float num_ones = 0;
+    float num_bits = state.size();
+    for (int bit : state) {
+      if (bit == 0) {
+        num_zeros = num_zeros + 1;
+      } else {
+        num_ones = num_ones + 1;
+      }
+    }
+    float zeros_fraction = num_zeros / num_bits;
+    float ones_fraction = num_ones / num_bits;
+    float alpha = 0.5 * (1 - Math.abs(ones_fraction - zeros_fraction));
+    return alpha;
+  }
+  
   
   int size() {
     return nodes.size();
@@ -176,12 +230,10 @@ class Network {
     int total = globe.size();
     //int[] results = new int[total];
     ArrayList<Integer> results = new ArrayList<Integer>();
-    //String results = "";
     for (int i = 0; i < total; i++) {
       Node n1 = globe.get(i);
       int current_value = n1.get_value();
       results.add(current_value);
-      //results = results + String.valueOf(current_value);
       }
     return results;
   }
@@ -202,7 +254,8 @@ class Network {
   ArrayList<ArrayList<ArrayList<Integer>>> get_attractors(ArrayList<ArrayList<Integer>> S) {
     ArrayList<Integer> orig_state = get_network_state();
     int currentAttractor = 0;
-    ArrayList<ArrayList<ArrayList<Integer>>> resultList = new ArrayList<ArrayList<ArrayList<Integer>>>();
+    ArrayList<ArrayList<ArrayList<Integer>>> resultList =
+    new ArrayList<ArrayList<ArrayList<Integer>>>();
     state_attractor_numbers = new HashMap<ArrayList<Integer>, Integer>();
     for(ArrayList<Integer> startState : S) {
       if (get_state_attractor(startState) == 0) {
@@ -253,8 +306,7 @@ class Network {
 }
   
   
-  
-  
+
   
   
   

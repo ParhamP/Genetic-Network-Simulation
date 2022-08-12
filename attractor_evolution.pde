@@ -2,13 +2,13 @@ import peasy.*;
 PeasyCam cam;
 import java.util.*;
 import java.lang.Math;
-import java.util.Arrays;
+Network old_network;
 Network network;
 float time = 0;
 float time_increment = 1;
-int k_n = 4;
+int k_n = 8;
 float p = 0.5;
-int k_max = 6; // orig 12
+int k_max = 5; // orig 12
 int n_max = 50; // orig 100
 int[] first_state;
 int attractor_count = 0;
@@ -55,8 +55,8 @@ void setup() {
 void draw() {
   
   if (time == 0) {
-    total = 75;
-    seed = 5;
+    total = 35;
+    seed = 6;
     generator = new Random(seed);
     
     //int[][] x = generate_binary_matrix(5);
@@ -66,18 +66,29 @@ void draw() {
     
     
     //println(x.get(99999));
-    network = new Network(total, p, k_max, n_max, generator);
-    network.create_connections(k_n);
+    old_network = new Network(total, p, k_max, n_max, generator);
+    old_network.create_connections(4);
     
-    S = generate_random_binary_numbers(total, 100000, generator);
+    
+    network = new Network(old_network);
+    
+    //old_network.nodes.clear();
+    
+    
+    
+    
+    //S = generate_random_binary_numbers(total, 1000, generator);
     
     //println(S.get(2));
-    println(S.size());
+    //println(S.size());
   
-    attractors = network.get_attractors(S);
+    //attractors = network.get_attractors(S);
+    
+    //float agev = network.average_gene_expression_variability();
+    //println(agev);
     
     //println(attractors);
-    println(attractors.size());
+    //println(attractors.size());
     
     
     //int[][] x = generate_binary_matrix(10);
@@ -102,9 +113,9 @@ void draw() {
 
     
     
-    //Population pop = new Population(k_max, n_max);
+    Population pop = new Population(k_max, n_max);
     
-    //pop.initialize_networks(500, 15, 0.5, 3);
+    pop.initialize_networks(500, 5, 0.5, 3);
     
     //pop.get_all_networks_attractors();
     //for (int i = 0; i < pop.size(); i++) {
@@ -116,7 +127,7 @@ void draw() {
     //        println(current_attractor);
     //      }
     //}
-    //pop.evolve();
+    pop.evolve();
     //println(random_attractor);
     
     //pop.mutate_population();
