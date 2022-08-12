@@ -115,7 +115,7 @@ void draw() {
     
     Population pop = new Population(k_max, n_max);
     
-    pop.initialize_networks(500, 5, 0.5, 3);
+    pop.initialize_networks(500, 35, 0.5, 4);
     
     //pop.get_all_networks_attractors();
     //for (int i = 0; i < pop.size(); i++) {

@@ -5,7 +5,7 @@ class Population {
   int seed;
   float u;
   int k_max;
-  ArrayList<ArrayList<ArrayList<ArrayList<Integer>>>> all_networks_attractors;
+  ArrayList<HashSet<HashSet<ArrayList<Integer>>>> all_networks_attractors;
   ArrayList<ArrayList<Integer>> S;
   int min_allowed_num_networks;
   int num_orig_networks;
@@ -78,49 +78,61 @@ class Population {
     }
   }
   
-  void generate_subsets() {
+  void generate_subsets(int amount) {
     int example_network_size = current_network_size();
-    S =  generate_random_binary_numbers(example_network_size, 1000, generator);
+    S =  generate_random_binary_numbers(example_network_size, amount, generator);
   }
   
-  ArrayList<ArrayList<ArrayList<ArrayList<Integer>>>> get_all_networks_attractors() {
-    all_networks_attractors = new ArrayList<ArrayList<ArrayList<ArrayList<Integer>>>>();
+  ArrayList<HashSet<HashSet<ArrayList<Integer>>>> get_all_networks_attractors() {
+    all_networks_attractors = new ArrayList<HashSet<HashSet<ArrayList<Integer>>>>();
     for (int i = 0; i < population.size(); i++) {
       Network network = population.get(i);
-      ArrayList<ArrayList<ArrayList<Integer>>> current_network_attractors =
+      HashSet<HashSet<ArrayList<Integer>>> current_network_attractors =
       network.get_attractors(S);
       all_networks_attractors.add(current_network_attractors);
     }
     return all_networks_attractors;
   }
   
+  boolean a2_contains_a1(HashSet<HashSet<ArrayList<Integer>>> a1,
+                                       HashSet<HashSet<ArrayList<Integer>>> a2) {
+    if (a1.size() > a2.size()) {
+      return false;
+    }
+    for (HashSet<ArrayList<Integer>> attractor_1 : a1) {
+      if (!a2.contains(attractor_1)) {
+        return false;
+      }
+    }
+    return true;
+  }
+  
   void evolve() {
-    generate_subsets();
     int num_generations_max = 10;
+    
     for (int g_i = 0; g_i < num_generations_max; g_i++) {
-      generate_subsets();
-      ArrayList<ArrayList<ArrayList<ArrayList<Integer>>>> pre_attractors =
+      generate_subsets(500);
+      ArrayList<HashSet<HashSet<ArrayList<Integer>>>> pre_attractors =
       get_all_networks_attractors();
       mutate_population();
-      ArrayList<ArrayList<ArrayList<ArrayList<Integer>>>> post_attractors =
+      ArrayList<HashSet<HashSet<ArrayList<Integer>>>> post_attractors =
       get_all_networks_attractors();
       ArrayList<Integer> acc_violators = new ArrayList<Integer>();
       int count = 0;
       for (int i = 0; i < pre_attractors.size(); i++) { // looping through networks
-        ArrayList<ArrayList<ArrayList<Integer>>> current_pre_attractors =
+        HashSet<HashSet<ArrayList<Integer>>> current_pre_attractors =
         pre_attractors.get(i);
-        ArrayList<ArrayList<ArrayList<Integer>>> current_post_attractors =
+        HashSet<HashSet<ArrayList<Integer>>> current_post_attractors =
         post_attractors.get(i);
-        if (!current_pre_attractors.equals(current_post_attractors)) {
-          if (current_post_attractors.size() > current_pre_attractors.size()) {
-            println(current_pre_attractors); //<>// //<>//
-            println(current_post_attractors);
-            println(current_pre_attractors.size());
-            println(current_post_attractors.size());
-            println("----------");
-          }
+        
+        if (current_post_attractors.size() < current_pre_attractors.size()) {
           count = count + 1;
           acc_violators.add(i);
+        } else {
+          if(!a2_contains_a1(current_pre_attractors, current_post_attractors)) {
+          count = count + 1;
+          acc_violators.add(i);
+          }
         }
       }
       Collections.sort(acc_violators, Collections.reverseOrder());
@@ -128,14 +140,16 @@ class Population {
         population.remove(i);
       }
       
-      //float total = post_attractors.size();
-      //float count_l = 0;
-      //for (ArrayList<ArrayList<ArrayList<Integer>>> network_attractors : post_attractors) {
-      //  //println(network_attractors.size());
-      //  count_l = count_l + network_attractors.size();
-      //}
+      float total = post_attractors.size();
+      float count_l = 0;
+      for (HashSet<HashSet<ArrayList<Integer>>> network_attractors : post_attractors) {
+        //println(network_attractors.size());
+        count_l = count_l + network_attractors.size();
+      }
       
-      //println(count_l / total);
+      println(count_l / total);
+      println(population.size());
+      println("-----------");
       
       if (population.size() < min_allowed_num_networks) {
         int population_size = population.size();

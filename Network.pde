@@ -9,7 +9,7 @@ class Network {
   HashMap<ArrayList<Integer>, Integer> state_attractor_numbers;
   HashMap<Integer, int[][]> binary_functions_archive;
   Random generator;
-  ArrayList<ArrayList<ArrayList<Integer>>> attractors;
+  HashSet<HashSet<ArrayList<Integer>>> attractors;
   
   Network() {
   }
@@ -192,7 +192,7 @@ class Network {
     // gene expression variability
     float total_alpha = 0;
     float total_count = 0;
-    for (ArrayList<ArrayList<Integer>> attractor : attractors) {
+    for (HashSet<ArrayList<Integer>> attractor : attractors) {
       for (ArrayList<Integer> state : attractor) {
         float alpha = alpha_fitness(state);
         total_alpha = total_alpha + alpha;
@@ -251,11 +251,11 @@ class Network {
     }
   }
   
-  ArrayList<ArrayList<ArrayList<Integer>>> get_attractors(ArrayList<ArrayList<Integer>> S) {
+  HashSet<HashSet<ArrayList<Integer>>> get_attractors(ArrayList<ArrayList<Integer>> S) {
     ArrayList<Integer> orig_state = get_network_state();
     int currentAttractor = 0;
-    ArrayList<ArrayList<ArrayList<Integer>>> resultList =
-    new ArrayList<ArrayList<ArrayList<Integer>>>();
+    HashSet<HashSet<ArrayList<Integer>>> resultList =
+    new HashSet<HashSet<ArrayList<Integer>>>();
     state_attractor_numbers = new HashMap<ArrayList<Integer>, Integer>();
     for(ArrayList<Integer> startState : S) {
       if (get_state_attractor(startState) == 0) {
@@ -268,7 +268,7 @@ class Network {
         int current_state_attractor = get_state_attractor(current);
         if (current_state_attractor == currentAttractor) {
           ArrayList<Integer> attractorStart = current;
-          ArrayList<ArrayList<Integer>> attractor = new ArrayList<ArrayList<Integer>>();
+          HashSet<ArrayList<Integer>> attractor = new HashSet<ArrayList<Integer>>();
           do {
             attractor.add(current);
             current = update_state(current);
@@ -295,7 +295,7 @@ class Network {
     if (attractors == null || attractors.isEmpty()) {
       return false;
     }
-    for (ArrayList<ArrayList<Integer>> s_a : attractors) {
+    for (HashSet<ArrayList<Integer>> s_a : attractors) {
       for (ArrayList<Integer> s : s_a) {
         if (s.equals(state)) {
           return true;
