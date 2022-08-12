@@ -109,7 +109,6 @@ class Population {
   
   void evolve() {
     int num_generations_max = 10;
-    
     for (int g_i = 0; g_i < num_generations_max; g_i++) {
       generate_subsets(500);
       ArrayList<HashSet<HashSet<ArrayList<Integer>>>> pre_attractors =
@@ -118,38 +117,39 @@ class Population {
       ArrayList<HashSet<HashSet<ArrayList<Integer>>>> post_attractors =
       get_all_networks_attractors();
       ArrayList<Integer> acc_violators = new ArrayList<Integer>();
-      int count = 0;
       for (int i = 0; i < pre_attractors.size(); i++) { // looping through networks
         HashSet<HashSet<ArrayList<Integer>>> current_pre_attractors =
         pre_attractors.get(i);
         HashSet<HashSet<ArrayList<Integer>>> current_post_attractors =
         post_attractors.get(i);
         
+        //if (!current_pre_attractors.equals(current_post_attractors)) {
+        //    acc_violators.add(i);
+        //  }
+        
         if (current_post_attractors.size() < current_pre_attractors.size()) {
-          count = count + 1;
           acc_violators.add(i);
         } else {
           if(!a2_contains_a1(current_pre_attractors, current_post_attractors)) {
-          count = count + 1;
           acc_violators.add(i);
           }
         }
       }
+      
       Collections.sort(acc_violators, Collections.reverseOrder());
       for (int i : acc_violators) {
         population.remove(i);
       }
       
-      float total = post_attractors.size();
-      float count_l = 0;
-      for (HashSet<HashSet<ArrayList<Integer>>> network_attractors : post_attractors) {
-        //println(network_attractors.size());
-        count_l = count_l + network_attractors.size();
-      }
+      //float total = post_attractors.size();
+      //float count_l = 0;
+      //for (HashSet<HashSet<ArrayList<Integer>>> network_attractors : post_attractors) {
+      //  //println(network_attractors.size());
+      //  count_l = count_l + network_attractors.size();
+      //}
       
-      println(count_l / total);
-      println(population.size());
-      println("-----------");
+      //println(count_l / total);
+      
       
       if (population.size() < min_allowed_num_networks) {
         int population_size = population.size();
@@ -174,12 +174,12 @@ class Population {
         }
       }
       
+      println(population.size());
+      println("-----------");
       
       if (g_i % 2000 == 0) {
         
-      
       }
-      
     }
   }
   
