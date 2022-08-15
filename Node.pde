@@ -47,42 +47,17 @@ class Node {
     set_location(x, y, z);
     p = bias;
     k_max = max_num_inputs;
-    input_signals_quantities = new ArrayList<Integer>();
-    output_signals_quantities = new ArrayList<Integer>();
     input_signals = new ArrayList<Signal>();
     output_signals = new ArrayList<Signal>();
-    //value = -1; // indicates it hasn't been calculated yet
+    input_signals_quantities = new ArrayList<Integer>();
+    output_signals_quantities = new ArrayList<Integer>();
     generator = new Random();
     value = generate_random_binary_with_prob(generator, 0.5);
   }
   
  Node(float x, float y, float z, float bias, int max_num_inputs, Random my_generator) {
-    set_location(x, y, z);
-    p = bias;
-    k_max = max_num_inputs;
-    input_signals_quantities = new ArrayList<Integer>();
-    output_signals_quantities = new ArrayList<Integer>();
-    input_signals = new ArrayList<Signal>();
-    output_signals = new ArrayList<Signal>();
-    //value = -1; // indicates it hasn't been calculated yet
+    this(x, y, z, bias, max_num_inputs);
     generator = my_generator;
-    value = generate_random_binary_with_prob(generator, 0.5);
-  }
-  
-  ArrayList<Integer> DeepCopyArrayListInteger(ArrayList<Integer> old){
-    ArrayList<Integer> copy = new ArrayList<Integer>(old.size());
-    for(Integer i : old){
-        copy.add(Integer.valueOf(i));
-    }
-    return copy;
-  }
-  
-  int[][] DeepCopy2DArrayInt(int[][] matrix) {
-    int [][] myInt = new int[matrix.length][];
-    for(int i = 0; i < matrix.length; i++) {
-      myInt[i] = matrix[i].clone();
-    }
-    return myInt;
   }
   
   void set_location(float x, float y, float z) {
@@ -289,6 +264,14 @@ class Node {
         function_values.set(i, val);
       }
     }
+  }
+  
+  int num_affected_targets() {
+    double num_outputs = (double) num_output_connections();
+    double b = generator.nextDouble();
+    double lb = num_outputs * b;
+    int num_affected_targets = round((float) lb);
+    return num_affected_targets;
   }
   
   void regulatory_additive_mutation() { 

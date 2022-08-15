@@ -130,3 +130,19 @@ public int[] concatWithArrayCopy(int[] array1, int[] array2) {
     System.arraycopy(array2, 0, result, array1.length, array2.length);
     return result;
 }
+
+public  ArrayList<Integer> DeepCopyArrayListInteger(ArrayList<Integer> old){
+    ArrayList<Integer> copy = new ArrayList<Integer>(old.size());
+    for(Integer i : old){
+        copy.add(Integer.valueOf(i));
+    }
+    return copy;
+  }
+  
+public  int[][] DeepCopy2DArrayInt(int[][] matrix) {
+    int [][] myInt = new int[matrix.length][];
+    for(int i = 0; i < matrix.length; i++) {
+      myInt[i] = matrix[i].clone();
+    }
+    return myInt;
+  }

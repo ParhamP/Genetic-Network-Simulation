@@ -4,12 +4,14 @@ class Network {
   int k_max; // max num of input signals
   int n_max; // max num of nodes
   ArrayList<Node> nodes;
-  int k;
+  //int k;
   float r = 700;
-  HashMap<ArrayList<Integer>, Integer> state_attractor_numbers;
   HashMap<Integer, int[][]> binary_functions_archive;
   Random generator;
+  float[][] sphere_points;
+  int next_sphere_point_index;
   HashSet<HashSet<ArrayList<Integer>>> attractors;
+  HashMap<ArrayList<Integer>, Integer> state_attractor_numbers;
   
   Network() {
   }
@@ -24,6 +26,7 @@ class Network {
       nodes = create_sphere();
       binary_functions_archive = new HashMap<Integer, int[][]>();
       state_attractor_numbers = new HashMap<ArrayList<Integer>, Integer>();
+      next_sphere_point_index = 0;
   }
   
   public Network(Network network) {
@@ -45,6 +48,12 @@ class Network {
     this.r = network.r;
     this.binary_functions_archive = network.binary_functions_archive;
     this.generator = network.generator;
+    float [][] sphere_points_copy = new float[network.sphere_points.length][];
+    for(int i = 0; i < network.sphere_points.length; i++) {
+      sphere_points_copy[i] = network.sphere_points[i].clone();
+    }
+    this.sphere_points = sphere_points_copy;
+    this.next_sphere_point_index = network.next_sphere_point_index;
     //this.state_attractor_numbers = network.state_attractor_numbers;
     //this.attractors = network.attractors;
   }
@@ -61,46 +70,50 @@ class Network {
     return nodes.indexOf(node);
   }
   
-  ArrayList<Node> create_sphere() {
-    ArrayList<Node> globe = new ArrayList<Node>();
-     int total_count = ceil(sqrt(total.floatValue()));
-     int add_count = 0;
-     int miss_count = 0;
+  float[] get_new_node_position() {
+    float[] pos = sphere_points[next_sphere_point_index];
+    next_sphere_point_index = next_sphere_point_index + 1;
+    return pos;
+  }
+  
+  float[][] generate_all_sphere_points() {
+    int total_count = ceil(sqrt((float) n_max));
+    float[][] res = new float[n_max][3];
+    int point_counter = 0;
     for (int i = 0; i < total_count; i++) {
-      float lat = map(i, 0, total_count, 0.1, PI);
+      float lat = map(i, 0, total_count, 1, PI);
       for (int j = 0; j < total_count; j++) {
-        float lon = map(j, 0, total_count, 0.1, TWO_PI);
+        float lon = map(j, 0, total_count, 1, TWO_PI);
         float x = r * sin(lat) * cos(lon);
         float y = r * sin(lat) * sin(lon);
         float z = r * cos(lat);
-        
+        res[point_counter][0] = x;
+        res[point_counter][1] = y;
+        res[point_counter][2] = z;
+        point_counter = point_counter + 1;
+        if (point_counter >= n_max) {
+          sphere_points = res;
+          return res;
+        }
+       }
+    }
+    return res;
+  }
+  
+    ArrayList<Node> create_sphere() {
+      generate_all_sphere_points();
+      ArrayList<Node> globe = new ArrayList<Node>();
+      for (int i = 0; i < total; i++) {
+        float[] x_y_z = sphere_points[i];
+        float x = x_y_z[0];
+        float y = x_y_z[1];
+        float z = x_y_z[2];
         Node current_node = new Node(x, y, z, p, k_max, generator);
         current_node.set_my_network(this);
-        
-        if (globe.contains(current_node)) {
-          miss_count = miss_count + 1;
-          println(x);
-          println(y);
-          println(z);
-          println(i);
-          println(j);
-          println("------------");
-          continue;
-        }
         globe.add(current_node);
-        add_count = add_count + 1;
-        if (add_count == total) {
-          //println("All nodes were added.");
-          return globe;
-        }
-        //total_count = total_count + 1;
-        //if (total_count == total) {
-        //  return globe;
-        //}
-       }
-     }
-     //println(miss_count);
-     return globe;
+      }
+      next_sphere_point_index = total;
+      return globe;
   }
   
   void connect(Node node_1, Node node_2) { // node_2 receives input node_1
@@ -148,7 +161,6 @@ class Network {
       }
       n1.generate_functions(functions);
     }
-    k = k_n;
   }
   
   ArrayList<Integer> update_state() {
@@ -185,7 +197,18 @@ class Network {
   }
     
   float average_sensetivity() {
-    return 2 * p * (1 - p) * k;
+    float avg_k = calculate_average_k();
+    return 2 * p * (1 - p) * avg_k;
+  }
+  
+  float calculate_average_k() {
+    float k_sum = 0;
+    float num_nodes = (float) nodes.size();
+    for (Node node : nodes) {
+      k_sum = k_sum + node.num_regulators();
+    }
+    float avg_k = k_sum / num_nodes;
+    return avg_k;
   }
   
   float average_gene_expression_variability() {
@@ -201,6 +224,56 @@ class Network {
     }
     float res = total_alpha / total_count;
     return res;
+  }
+  
+  void gene_duplication_and_divergence() {
+    int network_size = this.size();
+    if (network_size > n_max) {
+      return;
+    }
+    int selected_node_index = getRandomNumber(generator, 0, network_size);
+    Node selected_node = nodes.get(selected_node_index);
+    float[] duplicated_node_pos = get_new_node_position();
+    float x = duplicated_node_pos[0];
+    float y = duplicated_node_pos[1];
+    float z = duplicated_node_pos[2];
+    Node duplicated_node = new Node(x, y, z, p, k_max, generator);
+    duplicated_node.set_my_network(this);
+    duplicated_node.set_value(selected_node.get_value());
+    nodes.add(duplicated_node);
+    ArrayList<Signal> selected_input_signals = selected_node.input_signals;
+    ArrayList<Integer> selected_input_quantities = selected_node.input_signals_quantities;
+    for (int i = 0; i < selected_input_signals.size(); i++) {
+      Signal signal = selected_input_signals.get(i);
+      Node source = signal.get_source();
+      int quantity = selected_input_quantities.get(i);
+      for (int j = 0; j < quantity; j++) {
+        connect(source, duplicated_node);
+      }
+    }
+    ArrayList<Signal> selected_output_signals = selected_node.output_signals;
+    ArrayList<Integer> selected_output_quantities = selected_node.output_signals_quantities;
+    for (int i = 0; i < selected_output_signals.size(); i++) {
+      Signal signal = selected_output_signals.get(i);
+      Node target = signal.get_target();
+      int quantity = selected_output_quantities.get(i);
+      for (int j = 0; j < quantity; j++) {
+        connect(duplicated_node, target);
+      }
+    }
+    Double prob = generator.nextDouble();
+    if (prob < 0.5) {
+      duplicated_node.regulatory_additive_mutation();
+    } else {
+      duplicated_node.regulatory_subtractive_mutation();
+    }
+    int num_affected_targets = duplicated_node.num_affected_targets();
+    prob = generator.nextDouble();
+    if (prob < 0.5) {
+      duplicated_node.coding_additive_mutation(num_affected_targets);
+    } else {
+      duplicated_node.coding_subtractive_mutation(num_affected_targets);
+    }
   }
   
   float alpha_fitness(ArrayList<Integer> state) {

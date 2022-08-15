@@ -45,6 +45,7 @@ class Population {
     return network_size;
   }
   
+  
   void mutate_population() {
     for (Network network : population) {
       ArrayList<Node> nodes = network.get_nodes();
@@ -62,10 +63,11 @@ class Population {
           }
         }
         // Coding Mutation
-        double num_outputs = (double) node.num_output_connections();
-        double b = generator.nextDouble();
-        double lb = num_outputs * b;
-        int num_affected_targets = round((float) lb);
+        //double num_outputs = (double) node.num_output_connections();
+        //double b = generator.nextDouble();
+        //double lb = num_outputs * b;
+        //int num_affected_targets = round((float) lb);
+        int num_affected_targets = node.num_affected_targets(); // double check this
         Double prob = generator.nextDouble();
         if (prob < (1 - u)) {
           continue;
@@ -108,7 +110,7 @@ class Population {
   }
   
   void evolve() {
-    int num_generations_max = 10;
+    int num_generations_max = 10; //<>//
     for (int g_i = 0; g_i < num_generations_max; g_i++) {
       generate_subsets(500);
       ArrayList<HashSet<HashSet<ArrayList<Integer>>>> pre_attractors =
@@ -134,6 +136,7 @@ class Population {
           acc_violators.add(i);
           }
         }
+        
       }
       
       Collections.sort(acc_violators, Collections.reverseOrder());
@@ -174,14 +177,43 @@ class Population {
         }
       }
       
-      println(population.size());
-      println("-----------");
+      //println(population.size());
       
-      if (g_i % 2000 == 0) {
-        
+      
+      //float critic_sum = 0;
+      //float num_networks = (float) population.size();
+      //for (Network network : population) {
+      //  critic_sum = critic_sum + network.average_sensetivity();
+      //}
+      //float avg_networks_critic = critic_sum / num_networks;
+      //println(avg_networks_critic);
+      //println("-----------");
+      
+      ArrayList<Integer> aic_violators = new ArrayList<Integer>();
+      
+      if (g_i % 1 == 0) {
+        for (int i = 0; i < population.size(); i++) {
+          Network network = population.get(i);
+          HashSet<HashSet<ArrayList<Integer>>> current_pre_attractors =
+          network.get_attractors(S);
+          network.gene_duplication_and_divergence();
+          HashSet<HashSet<ArrayList<Integer>>> current_post_attractors =
+          network.get_attractors(S);
+          if (current_post_attractors.size() <= current_pre_attractors.size()) {
+            aic_violators.add(i);
+          } else {
+          if(!a2_contains_a1(current_pre_attractors, current_post_attractors)) {
+            aic_violators.add(i);
+          }
+        }
+      }
+      Collections.sort(aic_violators, Collections.reverseOrder());
+      for (int i : aic_violators) {
+        population.remove(i);
       }
     }
   }
+}
   
   int get_num_networks() {
     return population.size();
