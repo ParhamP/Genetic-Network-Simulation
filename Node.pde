@@ -351,17 +351,4 @@ class Node {
      int node_num_in_network = my_network.get_node_number(this);
       return String.valueOf(node_num_in_network);
    }
-   
-  
-    @Override
-    public boolean equals(Object o) {
-      if (o == this) {
-        return true;
-      }
-      if (!(o instanceof Node)) {
-            return false;
-      }
-      Node c = (Node) o;
-      return this.get_location().equals(c.get_location());
-    }
 }

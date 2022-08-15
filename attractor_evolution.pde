@@ -8,15 +8,15 @@ float time = 0;
 float time_increment = 1;
 int k_n = 8;
 float p = 0.5;
-int k_max = 6; // orig 12
-int n_max = 50; // orig 100
+int k_max = 12; // orig 12
+int n_max = 20; // orig 100
 int[] first_state;
 int attractor_count = 0;
 int total;
 int seed;
 Random generator;
 ArrayList<ArrayList<Integer>> S;
-ArrayList<ArrayList<ArrayList<Integer>>> attractors;
+HashSet<HashSet<ArrayList<Integer>>> attractors;
 
 
 
@@ -32,7 +32,7 @@ void draw() {
   
   if (time == 0) {
     total = 5;
-    seed = 1;
+    seed = 2;
     generator = new Random(seed);
     
     old_network = new Network(total, p, k_max, n_max, generator);
@@ -51,11 +51,11 @@ void draw() {
     //println(attractors);
     //println(attractors.size());
     
-    Population pop = new Population(k_max, n_max);
+    //Population pop = new Population(k_max, n_max);
     
-    pop.initialize_networks(500, 35, 0.5, 4);
+    //pop.initialize_networks(200, 25, 0.5, 3);
     
-    pop.evolve();
+    //pop.evolve();
     
     
 }
@@ -82,6 +82,9 @@ void mousePressed() {
   //ArrayList<Integer> my_state = x.get(0);
   //network.set_node_values(my_state);
   
-  //network.gene_duplication_and_divergence();
+  network.gene_duplication_and_divergence();
+  println(network.size());
+  //S = generate_random_binary_numbers(network.size(), 1000, generator);
+  //attractors = network.get_attractors(S);
   
 }

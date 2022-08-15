@@ -67,7 +67,11 @@ class Network {
   }
   
   int get_node_number(Node node) {
-    return nodes.indexOf(node);
+    int node_number =  nodes.indexOf(node);
+    if (node_number == -1) {
+      println("HI");
+    }
+    return node_number;
   }
   
   float[] get_new_node_position() {
@@ -75,6 +79,7 @@ class Network {
     next_sphere_point_index = next_sphere_point_index + 1;
     return pos;
   }
+  
   
   float[][] generate_all_sphere_points() {
     int total_count = ceil(sqrt((float) n_max));
