@@ -1,26 +1,38 @@
 class Node {
-  PVector location;
+  float[] location;
   int value;
   ArrayList<Signal> input_signals;
   ArrayList<Signal> output_signals;
   ArrayList<Integer> input_signals_quantities;
   ArrayList<Integer> output_signals_quantities;
   float p; // bias
-  int k_max; // max num of input signals
   int[][] functions;
   ArrayList<Integer> function_values;
-  //int seed = 0;
   Random generator;
   Network my_network;
   
+  Node(float bias) {
+    p = bias;
+    input_signals = new ArrayList<Signal>();
+    output_signals = new ArrayList<Signal>();
+    input_signals_quantities = new ArrayList<Integer>();
+    output_signals_quantities = new ArrayList<Integer>();
+    generator = new Random();
+    value = generate_random_binary_with_prob(generator, 0.5);
+  }
+  
+ Node(float bias, Random my_generator) {
+    this(bias);
+    generator = my_generator;
+  }
+  
   Node(Node node, Network new_my_network) {
-    this.location = node.location.copy();
+    //this.location = node.location.copy();
     this.value = node.value;
     this.my_network = new_my_network;
     this.input_signals_quantities = DeepCopyArrayListInteger(node.input_signals_quantities);
     this.output_signals_quantities = DeepCopyArrayListInteger(node.output_signals_quantities);
     this.p = node.p;
-    this.k_max = node.k_max;
     this.functions = DeepCopy2DArrayInt(node.functions);
     this.function_values = DeepCopyArrayListInteger(node.function_values);
     this.generator = node.generator;
@@ -43,28 +55,13 @@ class Node {
     this.output_signals = new_output_signals;
   }
   
-  Node(float x, float y, float z, float bias, int max_num_inputs) {
-    set_location(x, y, z);
-    p = bias;
-    k_max = max_num_inputs;
-    input_signals = new ArrayList<Signal>();
-    output_signals = new ArrayList<Signal>();
-    input_signals_quantities = new ArrayList<Integer>();
-    output_signals_quantities = new ArrayList<Integer>();
-    generator = new Random();
-    value = generate_random_binary_with_prob(generator, 0.5);
+
+  
+  void set_location(float[] my_location) {
+    location = my_location;
   }
   
- Node(float x, float y, float z, float bias, int max_num_inputs, Random my_generator) {
-    this(x, y, z, bias, max_num_inputs);
-    generator = my_generator;
-  }
-  
-  void set_location(float x, float y, float z) {
-    location = new PVector(x, y, z);
-  }
-  
-  PVector get_location() {
+  float[] get_location() {
     return location;
   }
   

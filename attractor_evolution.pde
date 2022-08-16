@@ -8,8 +8,8 @@ float time = 0;
 float time_increment = 1;
 int k_n = 8;
 float p = 0.5;
-int k_max = 12; // orig 12
-int n_max = 20; // orig 100
+int k_max = 6; // orig 12
+int n_max = 500; // orig 100
 int[] first_state;
 int attractor_count = 0;
 int total;
@@ -17,7 +17,7 @@ int seed;
 Random generator;
 ArrayList<ArrayList<Integer>> S;
 HashSet<HashSet<ArrayList<Integer>>> attractors;
-
+Visualization vis;
 
 
 void setup() {
@@ -25,18 +25,19 @@ void setup() {
   frameRate(60);
   cam = new PeasyCam(this, 2000);
   cam.rotateX(90);
+  vis = new Visualization();
   //noLoop();
 }
 
 void draw() {
   
   if (time == 0) {
-    total = 5;
+    total = 500;
     seed = 2;
     generator = new Random(seed);
     
     old_network = new Network(total, p, k_max, n_max, generator);
-    old_network.create_connections(4);
+    old_network.initialize_random_connections(4);
     
     
     network = new Network(old_network);
@@ -53,7 +54,7 @@ void draw() {
     
     //Population pop = new Population(k_max, n_max);
     
-    //pop.initialize_networks(200, 25, 0.5, 3);
+    //pop.initialize_networks(300, 25, 0.5, 3);
     
     //pop.evolve();
     
@@ -68,8 +69,8 @@ void draw() {
   //println(temp_state);
   
   
-  draw_sphere(network);
-  draw_connections(network);
+  vis.draw_sphere(network);
+  vis.draw_connections(network);
   if (time % 15 == 0) {
   network.update_state();
 

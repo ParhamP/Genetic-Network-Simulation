@@ -6,7 +6,6 @@ class Population {
   float u;
   int k_max;
   ArrayList<HashSet<HashSet<ArrayList<Integer>>>> all_networks_attractors;
-  //ArrayList<ArrayList<Integer>> S;
   int min_allowed_num_networks;
   int num_orig_networks;
   
@@ -30,7 +29,7 @@ class Population {
     population = new ArrayList<Network>();
     for (int m = 0; m < num_networks; m++) {
       Network new_network = new Network(n, p, k_max, n_max, generator);
-      new_network.create_connections(k_0);
+      new_network.initialize_random_connections(k_0);
       population.add(new_network);
     }
   }
@@ -255,7 +254,7 @@ class Population {
       println(population.size());
       
       ArrayList<Integer> aic_violators = new ArrayList<Integer>();
-      if (g_i % 100 == 0) {
+      if (g_i % 10 == 0) {
         for (int i = 0; i < population.size(); i++) {
           Network network = population.get(i);
           ArrayList<ArrayList<Integer>> post_S = generate_subsets(network.size() + 1, num_subsets);

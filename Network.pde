@@ -1,15 +1,10 @@
 class Network {
-  Integer total;
   float p;
   int k_max; // max num of input signals
   int n_max; // max num of nodes
   ArrayList<Node> nodes;
-  //int k;
-  float r = 700;
-  HashMap<Integer, int[][]> binary_functions_archive;
+  //HashMap<Integer, int[][]> binary_functions_archive;
   Random generator;
-  float[][] sphere_points;
-  int next_sphere_point_index;
   HashSet<HashSet<ArrayList<Integer>>> attractors;
   HashMap<ArrayList<Integer>, Integer> state_attractor_numbers;
   
@@ -19,18 +14,15 @@ class Network {
   Network(Integer num_nodes, float bias, int max_num_inputs, int max_num_nodes,
           Random my_generator) {
       generator = my_generator;
-      total = num_nodes;
       p = bias;
       k_max = max_num_inputs;
       n_max = max_num_nodes;
-      nodes = create_sphere();
-      binary_functions_archive = new HashMap<Integer, int[][]>();
+      //binary_functions_archive = new HashMap<Integer, int[][]>();
       state_attractor_numbers = new HashMap<ArrayList<Integer>, Integer>();
-      next_sphere_point_index = 0;
+      initialize_nodes(num_nodes);
   }
   
   public Network(Network network) {
-    this.total = network.total;
     this.p = network.p;
     this.k_max = network.k_max;
     this.n_max = network.n_max;
@@ -45,15 +37,8 @@ class Network {
       Node new_node = this.nodes.get(i);
       new_node.copy_signals(old_node);
     }
-    this.r = network.r;
-    this.binary_functions_archive = network.binary_functions_archive;
+    //this.binary_functions_archive = network.binary_functions_archive;
     this.generator = network.generator;
-    float [][] sphere_points_copy = new float[network.sphere_points.length][];
-    for(int i = 0; i < network.sphere_points.length; i++) {
-      sphere_points_copy[i] = network.sphere_points[i].clone();
-    }
-    this.sphere_points = sphere_points_copy;
-    this.next_sphere_point_index = network.next_sphere_point_index;
     //this.state_attractor_numbers = network.state_attractor_numbers;
     //this.attractors = network.attractors;
   }
@@ -74,54 +59,20 @@ class Network {
     return node_number;
   }
   
-  float[] get_new_node_position() {
-    float[] pos = sphere_points[next_sphere_point_index];
-    next_sphere_point_index = next_sphere_point_index + 1;
-    return pos;
-  }
-  
-  
-  float[][] generate_all_sphere_points() {
-    int total_count = ceil(sqrt((float) n_max));
-    float[][] res = new float[n_max][3];
-    int point_counter = 0;
-    for (int i = 0; i < total_count; i++) {
-      float lat = map(i, 0, total_count, 1, PI);
-      for (int j = 0; j < total_count; j++) {
-        float lon = map(j, 0, total_count, 1, TWO_PI);
-        float x = r * sin(lat) * cos(lon);
-        float y = r * sin(lat) * sin(lon);
-        float z = r * cos(lat);
-        res[point_counter][0] = x;
-        res[point_counter][1] = y;
-        res[point_counter][2] = z;
-        point_counter = point_counter + 1;
-        if (point_counter >= n_max) {
-          sphere_points = res;
-          return res;
-        }
-       }
+  void initialize_nodes(int num_nodes) {
+    ArrayList<Node> my_nodes = new ArrayList<Node>();
+    for (int i = 0; i < num_nodes; i++) {
+      Node current_node = new Node(p, generator);
+      current_node.set_my_network(this);
+      my_nodes.add(current_node);
     }
-    return res;
-  }
-  
-    ArrayList<Node> create_sphere() {
-      generate_all_sphere_points();
-      ArrayList<Node> globe = new ArrayList<Node>();
-      for (int i = 0; i < total; i++) {
-        float[] x_y_z = sphere_points[i];
-        float x = x_y_z[0];
-        float y = x_y_z[1];
-        float z = x_y_z[2];
-        Node current_node = new Node(x, y, z, p, k_max, generator);
-        current_node.set_my_network(this);
-        globe.add(current_node);
-      }
-      next_sphere_point_index = total;
-      return globe;
+    nodes = my_nodes;
   }
   
   void connect(Node node_1, Node node_2) { // node_2 receives input node_1
+    if (node_2.num_regulators() >= k_max) {
+      return;
+    }
     node_1.add_output(node_2);
     node_2.add_input(node_1);
   }
@@ -131,40 +82,30 @@ class Network {
     node_2.remove_input(node_1);
   }
   
-  
-  void create_connections(int k_n) {
-    ArrayList<Node> globe = nodes;
-    if (!binary_functions_archive.containsKey(k_n)) {
-      int[][] function_matrix = generate_binary_matrix(k_n);
-      binary_functions_archive.put(k_n, function_matrix);
-    }
-    int[][] functions = binary_functions_archive.get(k_n);
-    int total = globe.size();
-    for (int i = 0; i < total; i++) {
-      Node n1 = globe.get(i);
-      PVector v1 = n1.get_location();
+  void initialize_random_connections(int k_n) {
+    //if (!binary_functions_archive.containsKey(k_n)) {
+    //  int[][] function_matrix = generate_binary_matrix(k_n);
+    //  binary_functions_archive.put(k_n, function_matrix);
+    //}
+    //int[][] functions = binary_functions_archive.get(k_n);
+    int num_nodes = nodes.size();
+    for (int i = 0; i < num_nodes; i++) {
+      Node n1 = nodes.get(i);
       // choose k_n random nodes
       ArrayList<Integer> list = new ArrayList<Integer>();
-      for (int k = 0; k < total; k++) {
+      for (int k = 0; k < num_nodes; k++) {
         if (k == i) {
           continue;
         }
         list.add(k);
       }
-      
       Collections.shuffle(list, generator);
       for (int j = 0; j < k_n; j++) {
         int other_node_index = list.get(j);
-        Node n2 = globe.get(other_node_index);
-        PVector v2 = n2.get_location();
-        float dist = v1.dist(v2);
-        if (dist < 1.0) {
-          continue;
-        }
-        //n1.receive_input(n2);// fix this
+        Node n2 = nodes.get(other_node_index);
         connect(n2, n1);
       }
-      n1.generate_functions(functions);
+      //n1.generate_functions(functions);
     }
   }
   
@@ -233,16 +174,12 @@ class Network {
   
   void gene_duplication_and_divergence() {
     int network_size = this.size();
-    if (network_size > n_max) {
+    if (network_size >= n_max) {
       return;
     }
     int selected_node_index = getRandomNumber(generator, 0, network_size);
     Node selected_node = nodes.get(selected_node_index);
-    float[] duplicated_node_pos = get_new_node_position();
-    float x = duplicated_node_pos[0];
-    float y = duplicated_node_pos[1];
-    float z = duplicated_node_pos[2];
-    Node duplicated_node = new Node(x, y, z, p, k_max, generator);
+    Node duplicated_node = new Node(p, generator);
     duplicated_node.set_my_network(this);
     duplicated_node.set_value(selected_node.get_value());
     nodes.add(duplicated_node);
@@ -380,22 +317,6 @@ class Network {
         }
       }
     }
-  return false;
-}
-  
-  
-
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+    return false;
+  }
 }

@@ -25,19 +25,11 @@ class Signal {
     return target;
   }
   
-  //void set_quantity(int num) {
-  //  quantity = num;
-  //}
-  
-  //int get_quantity() {
-  //  return quantity;
-  //}
-  
-  PVector get_source_location() {
+  float[] get_source_location() {
     return source.get_location();
   }
   
-  PVector get_target_location() {
+  float[] get_target_location() {
     return target.get_location();
   }
   
