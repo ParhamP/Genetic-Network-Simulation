@@ -18,7 +18,7 @@ class Node {
     input_signals_quantities = new ArrayList<Integer>();
     output_signals_quantities = new ArrayList<Integer>();
     generator = new Random();
-    value = generate_random_binary_with_prob(generator, 0.5);
+    value = Utils.generate_random_binary_with_prob(generator, 0.5);
   }
   
  Node(float bias, Random my_generator) {
@@ -30,11 +30,11 @@ class Node {
     //this.location = node.location.copy();
     this.value = node.value;
     this.my_network = new_my_network;
-    this.input_signals_quantities = DeepCopyArrayListInteger(node.input_signals_quantities);
-    this.output_signals_quantities = DeepCopyArrayListInteger(node.output_signals_quantities);
+    this.input_signals_quantities = Utils.DeepCopyArrayListInteger(node.input_signals_quantities);
+    this.output_signals_quantities = Utils.DeepCopyArrayListInteger(node.output_signals_quantities);
     this.p = node.p;
-    this.functions = DeepCopy2DArrayInt(node.functions);
-    this.function_values = DeepCopyArrayListInteger(node.function_values);
+    this.functions = Utils.DeepCopy2DArrayInt(node.functions);
+    this.function_values = Utils.DeepCopyArrayListInteger(node.function_values);
     this.generator = node.generator;
   }
   
@@ -173,10 +173,10 @@ class Node {
   
   void generate_functions() {
     int k = input_signals.size();
-    functions = generate_binary_matrix(k);
+    functions = Utils.generate_binary_matrix(k);
     function_values = new ArrayList<Integer>();
     for (int i = 0; i < functions.length; i++) {
-      int val = generate_random_binary_with_prob(generator, p);
+      int val = Utils.generate_random_binary_with_prob(generator, p);
       function_values.add(val);
     }
   }
@@ -185,7 +185,7 @@ class Node {
     this.functions = funcs;
     function_values = new ArrayList<Integer>();
     for (int i = 0; i < functions.length; i++) {
-      int val = generate_random_binary_with_prob(generator, p);
+      int val = Utils.generate_random_binary_with_prob(generator, p);
       function_values.add(val);
     }
   }
@@ -198,7 +198,7 @@ class Node {
       int current_input_val = current_signal.get_source_value();
       val[i] = current_input_val;
     }
-    int function_index = matrix_index_of_array(functions, val);
+    int function_index = Utils.matrix_index_of_array(functions, val);
     int function_value = function_values.get(function_index);
     this.value = function_value;
     return function_value;
@@ -209,7 +209,7 @@ class Node {
       int[] func = functions[i];
       int selected_node_value = func[input_index];
       if (selected_node_value == 1) {
-        int val = generate_random_binary_with_prob(generator, p);
+        int val = Utils.generate_random_binary_with_prob(generator, p);
         function_values.set(i, val);
       }
     }
@@ -220,7 +220,7 @@ class Node {
       int[] func = functions[i];
       int selected_node_value = func[selected_signal_index];
       if (selected_node_value == 1) {
-        int val = generate_random_binary_with_prob(generator, p);
+        int val = Utils.generate_random_binary_with_prob(generator, p);
         function_values.set(i, val);
       }
     }
@@ -238,9 +238,9 @@ class Node {
         selected_signal_index);
         int[] new_func_version_part_2 = Arrays.copyOfRange(old_func,
         selected_signal_index + 1, old_func.length);
-        int[] new_func_version = concatWithArrayCopy(new_func_version_part_1,
+        int[] new_func_version = Utils.concatWithArrayCopy(new_func_version_part_1,
         new_func_version_part_2);
-        int new_func_index = matrix_index_of_array(functions, new_func_version);
+        int new_func_index = Utils.matrix_index_of_array(functions, new_func_version);
         function_values.set(new_func_index, old_func_value);
       }
     }
@@ -253,11 +253,11 @@ class Node {
       int selected_node_value = func[func.length - 1];
       if (selected_node_value == 0) {
         int[] old_func_version = Arrays.copyOfRange(func, 0, func.length - 1);
-        int old_func_index = matrix_index_of_array(old_functions, old_func_version);
+        int old_func_index = Utils.matrix_index_of_array(old_functions, old_func_version);
         int old_func_value = old_function_values.get(old_func_index);
         function_values.set(i, old_func_value);
       } else {
-        int val = generate_random_binary_with_prob(generator, p);
+        int val = Utils.generate_random_binary_with_prob(generator, p);
         function_values.set(i, val);
       }
     }
@@ -275,7 +275,7 @@ class Node {
     int my_network_size = my_network.size();
     Node selected_node = this;
     while (selected_node.equals(this)) {
-      int selected_node_index = getRandomNumber(generator, 0, my_network_size);
+      int selected_node_index = Utils.getRandomNumber(generator, 0, my_network_size);
       selected_node = my_network.get_node(selected_node_index);
     }
     my_network.connect(selected_node, this);
@@ -283,7 +283,7 @@ class Node {
   
   void regulatory_subtractive_mutation() { 
     int input_signals_size = input_signals.size();
-    int selected_signal_index = getRandomNumber(generator, 0, input_signals_size);
+    int selected_signal_index = Utils.getRandomNumber(generator, 0, input_signals_size);
     Signal selected_signal = input_signals.get(selected_signal_index);
     Node source_node = selected_signal.get_source();
     my_network.disconnect(source_node, this);
@@ -295,10 +295,10 @@ class Node {
     ArrayList<Node> already_selected = new ArrayList<Node>();
     already_selected.add(this);
     while (targets.size() < num_affected_targets) {
-      int selected_node_index = getRandomNumber(generator, 0, my_network_size);
+      int selected_node_index = Utils.getRandomNumber(generator, 0, my_network_size);
       Node selected_node = my_network.get_node(selected_node_index);
       while (already_selected.contains(selected_node)) {
-        selected_node_index = getRandomNumber(generator, 0, my_network_size);
+        selected_node_index = Utils.getRandomNumber(generator, 0, my_network_size);
         selected_node = my_network.get_node(selected_node_index);
       }
       targets.add(selected_node);
@@ -312,11 +312,11 @@ class Node {
     ArrayList<Node> targets = new ArrayList<Node>();
     ArrayList<Node> already_selected = new ArrayList<Node>();
     while (targets.size() < num_affected_targets) {
-      int selected_node_index = getRandomNumber(generator, 0, output_size);
+      int selected_node_index = Utils.getRandomNumber(generator, 0, output_size);
       Signal selected_signal = output_signals.get(selected_node_index);
       Node selected_node = selected_signal.get_target();
       while (already_selected.contains(selected_node)) {
-        selected_node_index = getRandomNumber(generator, 0, output_size);
+        selected_node_index = Utils.getRandomNumber(generator, 0, output_size);
         selected_signal = output_signals.get(selected_node_index);
         selected_node = selected_signal.get_target();
       }

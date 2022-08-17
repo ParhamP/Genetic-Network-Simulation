@@ -19,6 +19,9 @@ ArrayList<ArrayList<Integer>> S;
 HashSet<HashSet<ArrayList<Integer>>> attractors;
 Visualization vis;
 
+import java.io.FileInputStream;
+import java.io.ObjectInputStream;
+
 
 void setup() {
   size(900, 900, P3D); 
@@ -26,7 +29,23 @@ void setup() {
   cam = new PeasyCam(this, 2000);
   cam.rotateX(90);
   vis = new Visualization();
+  Object obj = new Object();
+  try {
+    FileInputStream fileIn = new FileInputStream("/Users/parhamp/Documents/Processing/attractor_evolution/network.dat");
+    ObjectInputStream objectIn = new ObjectInputStream(fileIn);
+
+    obj = objectIn.readObject();
+
+    System.out.println("The Object has been read from the file");
+    objectIn.close();
+
+    } catch (Exception ex) {
+        ex.printStackTrace();
+    }
+
+    network = (Network) obj;
   //noLoop();
+  
 }
 
 void draw() {
@@ -36,11 +55,11 @@ void draw() {
     seed = 2;
     generator = new Random(seed);
     
-    old_network = new Network(total, p, k_max, n_max, generator);
-    old_network.initialize_random_connections(4);
+    //old_network = new Network(total, p, k_max, n_max, generator);
+    //old_network.initialize_random_connections(4);
     
     
-    network = new Network(old_network);
+    //network = new Network(old_network);
     
     //println(network.average_sensetivity());
     
@@ -83,8 +102,8 @@ void mousePressed() {
   //ArrayList<Integer> my_state = x.get(0);
   //network.set_node_values(my_state);
   
-  network.gene_duplication_and_divergence();
-  println(network.size());
+  //network.gene_duplication_and_divergence();
+  //println(network.size());
   //S = generate_random_binary_numbers(network.size(), 1000, generator);
   //attractors = network.get_attractors(S);
   

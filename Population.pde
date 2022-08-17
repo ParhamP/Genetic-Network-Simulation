@@ -79,7 +79,7 @@ class Population {
   ArrayList<ArrayList<Integer>> generate_subsets(int network_size, int amount) {
     //int example_network_size = current_network_size();
     
-    ArrayList<ArrayList<Integer>> S =  generate_random_binary_numbers(network_size, amount, generator);
+    ArrayList<ArrayList<Integer>> S =  Utils.generate_random_binary_numbers(network_size, amount, generator);
     return S;
   }
   

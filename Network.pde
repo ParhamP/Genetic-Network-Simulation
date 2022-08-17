@@ -177,7 +177,7 @@ class Network {
     if (network_size >= n_max) {
       return;
     }
-    int selected_node_index = getRandomNumber(generator, 0, network_size);
+    int selected_node_index = Utils.getRandomNumber(generator, 0, network_size);
     Node selected_node = nodes.get(selected_node_index);
     Node duplicated_node = new Node(p, generator);
     duplicated_node.set_my_network(this);
