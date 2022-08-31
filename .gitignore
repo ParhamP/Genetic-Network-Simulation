@@ -1,0 +1,5 @@
+saved_networks/
+.DS_Store
+.idea/
+out/
+*.iml
