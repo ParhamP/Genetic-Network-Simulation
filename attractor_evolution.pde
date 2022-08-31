@@ -2,7 +2,8 @@ import peasy.*;
 PeasyCam cam;
 import java.util.*;
 import java.lang.Math;
-Network old_network;
+//import src.*;
+//Network old_network;
 Network network;
 float time = 0;
 float time_increment = 1;
@@ -28,22 +29,44 @@ void setup() {
   frameRate(60);
   cam = new PeasyCam(this, 2000);
   cam.rotateX(90);
-  vis = new Visualization();
+  vis = new Visualization(); //<>//
+  
   Object obj = new Object();
   try {
-    FileInputStream fileIn = new FileInputStream("/Users/parhamp/Documents/Processing/attractor_evolution/network.dat");
-    ObjectInputStream objectIn = new ObjectInputStream(fileIn);
+      FileInputStream fileIn = new FileInputStream("/Users/parhamp/Documents/Processing/attractor_evolution/ex_net.dat");
+      ObjectInputStream objectIn = new ObjectInputStream(fileIn);
 
-    obj = objectIn.readObject();
+      obj = objectIn.readObject();
 
-    System.out.println("The Object has been read from the file");
-    objectIn.close();
+      System.out.println("The Object has been read from the file");
+      objectIn.close();
 
-    } catch (Exception ex) {
-        ex.printStackTrace();
-    }
+  } catch (Exception ex) {
+      ex.printStackTrace();
+  }
+  network = (Network) obj;
+  //network = population.population.get(generator.nextInt(population.size()));
+  //this.population = im_population;
+  
+  
+  //seed = 2;
+  //generator = new Random(seed);
+  //Network n = new Network(50, 0.5, 12, 100, generator);
+  //println(n.size());
+  //try {
+  //  FileInputStream fileIn = new FileInputStream("/Users/parhamp/Documents/Processing/attractor_evolution/884.dat");
+  //  ObjectInputStream objectIn = new ObjectInputStream(fileIn);
 
-    network = (Network) obj;
+  //  obj = objectIn.readObject();
+
+  //  System.out.println("The Object has been read from the file");
+  //  objectIn.close();
+
+  //  } catch (Exception ex) {
+  //      ex.printStackTrace();
+  //  }
+
+  //  network = (Network) obj;
   //noLoop();
   
 }
@@ -92,19 +115,18 @@ void draw() {
   vis.draw_connections(network);
   if (time % 15 == 0) {
   network.update_state();
-
   }
   time = time + time_increment;
 }
 
-void mousePressed() {
-  //ArrayList<ArrayList<Integer>> x = generate_random_binary_numbers(total, 1, generator);
-  //ArrayList<Integer> my_state = x.get(0);
-  //network.set_node_values(my_state);
+//void mousePressed() {
+//  //ArrayList<ArrayList<Integer>> x = generate_random_binary_numbers(total, 1, generator);
+//  //ArrayList<Integer> my_state = x.get(0);
+//  //network.set_node_values(my_state);
   
-  //network.gene_duplication_and_divergence();
-  //println(network.size());
-  //S = generate_random_binary_numbers(network.size(), 1000, generator);
-  //attractors = network.get_attractors(S);
+//  //network.gene_duplication_and_divergence();
+//  //println(network.size());
+//  //S = generate_random_binary_numbers(network.size(), 1000, generator);
+//  //attractors = network.get_attractors(S);
   
-}
+//}

@@ -61,7 +61,7 @@ class Visualization {
   
   float[][] generate_all_sphere_points(int num_nodes) {
     int total_count = ceil(sqrt((float) num_nodes));
-    float[][] res = new float[n_max][3];
+    float[][] res = new float[num_nodes][3];
     float r = 700;
     int point_counter = 0;
     for (int i = 0; i < total_count; i++) {
